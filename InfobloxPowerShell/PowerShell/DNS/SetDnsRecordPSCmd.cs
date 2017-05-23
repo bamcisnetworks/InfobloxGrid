@@ -1,46 +1,174 @@
 ﻿using BAMCIS.Infoblox.Common;
 using BAMCIS.Infoblox.InfobloxMethods;
+using BAMCIS.Infoblox.PowerShell.Generic;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Management.Automation;
-using System.Management.Automation.Host;
 
 namespace BAMCIS.Infoblox.PowerShell.DNS
 {
     [Cmdlet(VerbsCommon.Set,
         "IBXDnsRecord",
-        SupportsShouldProcess = true
-        )]
-    public class SetDnsRecordPSCmd : BaseIbxDnsPSCmd, IDynamicParameters
+        SupportsShouldProcess = true,
+        ConfirmImpact = ConfirmImpact.Medium,
+        DefaultParameterSetName = _ENTERED_SESSION_BY_ATTRIBUTE
+    )]
+    public class SetDnsRecordPSCmd : BaseIbxDnsForcePSCmd, IDynamicParameters
     {
-        private bool _nextAvailable;
-        private string _network;
-        private object _inputObject;
-        private InfoBloxObjectsEnum _type;
-        private bool _removeEmpty;
+        /* Parameters:
+        * Base: -GridMaster -Version [Dynamic Params]
+        * PassThru: -PassThru
+        * Force: -Force
+        */
+
+        private bool _NextAvailable;
+        private string _Network;
+        private object _InputObject;
+        private bool _RemoveEmpty;
 
         #region Parameters
 
+        /// <summary>
+        /// The existing InfobloxSession to use
+        /// </summary>
         [Parameter(
-           Position = 1,
-           ValueFromPipelineByPropertyName = true,
+            Mandatory = true,
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_BY_OBJECT
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_BY_ATTRIBUTE
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_NEXT_AVAILABLE_IP
+        )]
+        [ValidateNotNull()]
+        public override InfobloxSession Session
+        {
+            get
+            {
+                return base.Session;
+            }
+            set
+            {
+                base.Session = value;
+            }
+        }
+
+        /// <summary>
+        /// The grid master to communicate with. This will be used to build the URL string.
+        /// </summary>
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_BY_ATTRIBUTE
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_NEXT_AVAILABLE_IP
+        )]
+        [ValidateNotNullOrEmpty()]
+        public override string GridMaster
+        {
+            get
+            {
+                return base.GridMaster;
+            }
+            set
+            {
+                base.GridMaster = value;
+            }
+        }
+
+        /// <summary>
+        /// The API version to specify in the URL path. The function to build the URL string for the
+        /// query will add in the leading "v"
+        /// </summary>
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_BY_ATTRIBUTE
+        )]
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_NEXT_AVAILABLE_IP
+        )]
+        [Alias("ApiVersion")]
+        [ValidateSet("LATEST", "1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.4.1", "1.4.2",
+            "1.5", "1.6", "1.6.1", "1.7", "1.7.1", "1.7.2", "1.7.3", "1.7.4", "2.0",
+            "2.1", "2.1.1", "2.2", "2.2.1", "2.2.2", "2.3")]
+        [ValidateNotNullOrEmpty()]
+        public override string Version
+        {
+            get
+            {
+                return base.Version;
+            }
+            set
+            {
+                base.Version = value;
+            }
+        }
+
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_BY_ATTRIBUTE
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_NEXT_AVAILABLE_IP
+        )]
+        [ValidateNotNull()]
+        [System.Management.Automation.Credential()]
+        public override PSCredential Credential
+        {
+            get
+            {
+                return base.Credential;
+            }
+            set
+            {
+                base.Credential = value;
+            }
+        }
+
+        [Parameter(
            Mandatory = true,
            HelpMessage = "The dns record reference string."
-            )]
+        )]
         [Alias("Ref")]
         public string Reference
         {
             get
             {
-                return base.Ref;
+                return base._Ref;
             }
             set
             {
                 if (!String.IsNullOrEmpty(value))
                 {
-                    base.Ref = value;
+                    base._Ref = value;
                 }
                 else
                 {
@@ -50,43 +178,59 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
         }
 
         [Parameter(
-           Position = 2,
-           ValueFromPipelineByPropertyName = true,
-           ParameterSetName = "NextAvailableIp",
-           Mandatory = true,
-           HelpMessage = "Switch to change the IP address of the host to the next available in DHCP."
-           )
-        ]
+            ParameterSetName = _GRID_NEXT_AVAILABLE_IP,
+            Mandatory = true,
+            HelpMessage = "Switch to change the IP address of the host to the next available in DHCP."
+        )]
+        [Parameter(
+            ParameterSetName = _SESSION_NEXT_AVAILABLE_IP,
+            Mandatory = true,
+            HelpMessage = "Switch to change the IP address of the host to the next available in DHCP."
+        )]
+        [Parameter(
+            ParameterSetName = _ENTERED_SESSION_NEXT_AVAILABLE_IP,
+            Mandatory = true,
+            HelpMessage = "Switch to change the IP address of the host to the next available in DHCP."
+        )]
         [Alias("NextAvailable")]
         public SwitchParameter NextAvailableIp
         {
             get
             {
-                return this._nextAvailable;
+                return this._NextAvailable;
             }
             set
             {
-                this._nextAvailable = value;
+                this._NextAvailable = value;
             }
         }
 
         [Parameter(
             Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            ParameterSetName = "ByNextAvailableIp",
+            ParameterSetName = _GRID_NEXT_AVAILABLE_IP,
             HelpMessage = "The network to select the next available IP from."
-            )]
+        )]
+        [Parameter(
+            Mandatory = true,
+            ParameterSetName = _SESSION_NEXT_AVAILABLE_IP,
+            HelpMessage = "The network to select the next available IP from."
+        )]
+        [Parameter(
+            Mandatory = true,
+            ParameterSetName = _ENTERED_SESSION_NEXT_AVAILABLE_IP,
+            HelpMessage = "The network to select the next available IP from."
+        )]
         public string Network
         {
             get
             {
-                return this._network;
+                return this._Network;
             }
             set
             {
                 if (NetworkAddressTest.IsIPv4Cidr(value) || NetworkAddressTest.IsIPv6Cidr(value))
                 {
-                    this._network = value;
+                    this._Network = value;
                 }
                 else
                 {
@@ -97,23 +241,44 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
 
         [Parameter(
             Mandatory = false,
-            ValueFromPipelineByPropertyName = true,
-            ParameterSetName = "ByAttribute",
-            HelpMessage = "Set to define the new record by attributes.")]
+            ParameterSetName = BaseIbxObjectPSCmd._GRID_BY_ATTRIBUTE,
+            HelpMessage = "Set to define the new record by attributes."
+        )]
+        [Parameter(
+            Mandatory = false,
+            ParameterSetName = BaseIbxObjectPSCmd._SESSION_BY_ATTRIBUTE,
+            HelpMessage = "Set to define the new record by attributes."
+        )]
+        [Parameter(
+            Mandatory = false,
+            ParameterSetName = BaseIbxObjectPSCmd._ENTERED_SESSION_BY_ATTRIBUTE,
+            HelpMessage = "Set to define the new record by attributes."
+        )]
         public SwitchParameter ByAttribute { get; set; }
 
         [Parameter(
             Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
             ValueFromPipeline = true,
-            ParameterSetName = "ByObject",
+            ParameterSetName = BaseIbxObjectPSCmd._GRID_BY_OBJECT,
             HelpMessage = "The object to be updated."
-            )]
+        )]
+        [Parameter(
+            Mandatory = true,
+            ValueFromPipeline = true,
+            ParameterSetName = BaseIbxObjectPSCmd._SESSION_BY_OBJECT,
+            HelpMessage = "The object to be updated."
+        )]
+        [Parameter(
+            Mandatory = true,
+            ValueFromPipeline = true,
+            ParameterSetName = BaseIbxObjectPSCmd._ENTERED_SESSION_BY_OBJECT,
+            HelpMessage = "The object to be updated."
+        )]
         public object InputObject
         {
             get
             {
-                return this._inputObject;
+                return this._InputObject;
             }
             set
             {
@@ -133,13 +298,12 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
 
                     if (type.IsInfobloxDnsRecordType())
                     {
-                        this._inputObject = value;
+                        this._InputObject = value;
                     }
                     else
                     {
-                        throw new PSArgumentException(String.Format("The input object must be a dns record type, {0} was provided.", value.GetType().Name));
+                        throw new PSArgumentException($"The input object must be a dns record type, {value.GetType().FullName} was provided.");
                     }
-
                 }
                 else
                 {
@@ -147,21 +311,31 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
                 }
             }
         }
+
         [Parameter(
             Mandatory = false,
-            ValueFromPipelineByPropertyName = true,
-            ParameterSetName = "ByObject",
+            ParameterSetName = BaseIbxObjectPSCmd._GRID_BY_OBJECT,
             HelpMessage = "Indicate that empty or null values should be removed from the object before sending."
-            )]
+        )]
+        [Parameter(
+            Mandatory = false,
+            ParameterSetName = BaseIbxObjectPSCmd._SESSION_BY_OBJECT,
+            HelpMessage = "Indicate that empty or null values should be removed from the object before sending."
+        )]
+        [Parameter(
+            Mandatory = false,
+            ParameterSetName = BaseIbxObjectPSCmd._ENTERED_SESSION_BY_OBJECT,
+            HelpMessage = "Indicate that empty or null values should be removed from the object before sending."
+        )]
         public bool RemoveEmptyProperties
         {
             get
             {
-                return this._removeEmpty;
+                return this._RemoveEmpty;
             }
             set
             {
-                this._removeEmpty = value;
+                this._RemoveEmpty = value;
             }
         }
 
@@ -171,34 +345,34 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
         {
             base.GetDynamicParameters();
 
-            if (!this.ParameterSetName.Equals("ByObject"))
+            if (this.InputObject == null)
             {
                 RuntimeDefinedParameter param = IBXDynamicParameters.RecordType(true);
                 base.ParameterDictionary.Add(param.Name, param);
 
-                string recordType = base.GetUnboundValue("RecordType") as string;
+                string RecordType = this.GetUnboundValue<string>("RecordType");
 
-                if (!String.IsNullOrEmpty(recordType))
+                if (!String.IsNullOrEmpty(RecordType))
                 {
-                    if (Enum.TryParse<InfoBloxObjectsEnum>(recordType, out this._type))
+                    if (Enum.TryParse<InfoBloxObjectsEnum>(RecordType, out base.ObjectType))
                     {
-                        base.ObjectType = this._type;
-
-                        IEnumerable<RuntimeDefinedParameter> temp = new List<RuntimeDefinedParameter>();
-                        if (this.ParameterSetName.Equals("NextAvailableIp"))
+                        if (this.NextAvailableIp)
                         {
-                            temp = IBXDynamicParameters.ObjectTypeProperties(base.ObjectType);
+                            IEnumerable<RuntimeDefinedParameter> Temp = IBXDynamicParameters.ObjectTypeProperties(base.ObjectType);
                             string[] fieldsToRemove = new string[] { "ipv4addr", "ipv6addr" };
-                            temp = temp.Except(temp.Where(x => fieldsToRemove.Contains(x.Name)));
-                        }
-                        if (this.ParameterSetName.Equals("ByAttribute"))
-                        {
-                            temp = IBXDynamicParameters.ObjectTypeProperties(base.ObjectType, "ByAttribute");
+
+                            foreach (RuntimeDefinedParameter Param in Temp.Except(Temp.Where(x => fieldsToRemove.Contains(x.Name))))
+                            {
+                                base.ParameterDictionary.Add(Param.Name, Param);
+                            }
                         }
 
-                        foreach (RuntimeDefinedParameter pa in temp)
+                        if (this.InputObject == null && !this.NextAvailableIp)
                         {
-                            base.ParameterDictionary.Add(pa.Name, pa);
+                            foreach (RuntimeDefinedParameter Param in IBXDynamicParameters.ObjectTypeProperties(base.ObjectType, new string[] { _GRID_BY_ATTRIBUTE, _SESSION_BY_ATTRIBUTE, _ENTERED_SESSION_BY_ATTRIBUTE }))
+                            {
+                                base.ParameterDictionary.Add(Param.Name, Param);
+                            }
                         }
                     }
                 }
@@ -216,17 +390,35 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
 
         protected override void ProcessRecord()
         {
-            switch (this.ParameterSetName)
+            if (base.Force == true || ShouldProcess("DNS Record", "Update", "Updating IBX DNS Object"))
             {
-                case "ByObject":
-                    this.ProcessByObject();
-                    break;
-                case "ByAttribute":
-                case "ByNextAvailableIp":
-                    this.ProcessByAttribute();
-                    break;
-                default:
-                    throw new PSArgumentException("Bad parameter set name.");
+                if (base.Force == true || ShouldContinue("Do you want to update the DNS Record?", "Updating IBX DNS Object"))
+                {
+                    switch (this.ParameterSetName)
+                    {
+                        case _GRID_BY_OBJECT:
+                        case _SESSION_BY_OBJECT:
+                        case _ENTERED_SESSION_BY_OBJECT:
+                            {
+                                base.ProcessByUpdatedObject(this._InputObject, this.RemoveEmptyProperties);
+                                break;
+                            }
+                        case _GRID_BY_ATTRIBUTE:
+                        case _SESSION_BY_ATTRIBUTE:
+                        case _ENTERED_SESSION_BY_ATTRIBUTE:
+                        case _GRID_NEXT_AVAILABLE_IP:
+                        case _SESSION_NEXT_AVAILABLE_IP:
+                        case _ENTERED_SESSION_NEXT_AVAILABLE_IP:
+                            {
+                                base.ProcessByAttributeForUpdatedObject("RecordType");
+                                break;
+                            }
+                        default:
+                            {
+                                throw new PSArgumentException("Bad parameter set name.");
+                            }
+                    }
+                }
             }
         }
 
@@ -238,113 +430,6 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
         protected override void StopProcessing()
         {
             base.StopProcessing();
-        }
-
-        #endregion
-
-        #region Helper Methods
-
-        private void ProcessByObject()
-        {
-            bool RemoveEmpty = this._removeEmpty;
-
-            if (!this.MyInvocation.BoundParameters.ContainsKey("RemoveEmptyProperties"))
-            {
-                int choice = 0;
-
-                ChoiceDescription yes = new ChoiceDescription("&Remove", "Will remove empty and null values from the object during serialization.");
-                ChoiceDescription no = new ChoiceDescription("&Keep", "Will keep empty and null values and overwrite any existing values.");
-                Collection<ChoiceDescription> choices = new Collection<ChoiceDescription>() { yes, no };
-                choice = Host.UI.PromptForChoice("Update Infoblox Object", ("Do you want to remove the empty properties when sending the object?"), choices, 0);
-
-                
-                switch (choice)
-                {
-                    default:
-                    case 0:
-                        RemoveEmpty = true;
-                        break;
-                    case 1:
-                        RemoveEmpty = false;
-                        break;
-                }
-            }
-
-            try
-            {
-                this._inputObject.GetType().GetProperty("_ref").SetValue(this._inputObject, base.Ref);
-                base.Response = base.IBX.UpdateIbxObject(this._inputObject, RemoveEmpty);
-            }
-            catch (AggregateException ae)
-            {
-                PSCommon.WriteExceptions(ae, this.Host);
-                this.ThrowTerminatingError(new ErrorRecord(ae.Flatten(), ae.GetType().FullName, ErrorCategory.NotSpecified, this));
-            }
-            catch (Exception e)
-            {
-                PSCommon.WriteExceptions(e, this.Host);
-                this.ThrowTerminatingError(new ErrorRecord(e, e.GetType().FullName, ErrorCategory.NotSpecified, this));
-            }
-        }
-
-        private void ProcessByAttribute()
-        {
-            if (base.ParameterDictionary.ContainsKey("RecordType"))
-            {
-                string val = base.ParameterDictionary["RecordType"].Value as string;
-                if (!String.IsNullOrEmpty(val) && Enum.TryParse<InfoBloxObjectsEnum>(val.ToUpper(), out this._type))
-                {
-                    base.ObjectType = this._type;
-
-                    List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
-                    foreach (KeyValuePair<string, RuntimeDefinedParameter> obj in base.ParameterDictionary)
-                    {
-                        if (obj.Value.Value != null && !String.IsNullOrEmpty(obj.Value.Value as string))
-                        {
-                            list.Add(new KeyValuePair<string, string>(obj.Key, obj.Value.Value as string));
-                        }
-                    }
-
-                    if (this.ParameterSetName.Equals("ByNextAvailableIp"))
-                    {
-                        if (NetworkAddressTest.IsIPv4Cidr(this._network))
-                        {
-                            list.Add(new KeyValuePair<string, string>("ipv4addr", "func:nextavailableip:" + this._network));
-                        }
-                        else if (NetworkAddressTest.IsIPv6Cidr(this._network))
-                        {
-                            list.Add(new KeyValuePair<string, string>("ipv6addr", "func:nextavailableip:" + this._network));
-                        }
-                        else
-                        {
-                            throw new ArgumentException("The provided network was not a valid IPv4 or IPv6 network.");
-                        }
-                    }
-
-                    try
-                    {
-                        base.Response = typeof(IBXCommonMethods).GetMethod("UpdateIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).Invoke(base.IBX, new object[] { base.ObjectType, list }) as string;
-                    }
-                    catch (AggregateException ae)
-                    {
-                        PSCommon.WriteExceptions(ae, this.Host);
-                        this.ThrowTerminatingError(new ErrorRecord(ae.Flatten(), ae.GetType().FullName, ErrorCategory.NotSpecified, this));
-                    }
-                    catch (Exception e)
-                    {
-                        PSCommon.WriteExceptions(e, this.Host);
-                        this.ThrowTerminatingError(new ErrorRecord(e, e.GetType().FullName, ErrorCategory.NotSpecified, this));
-                    }
-                }
-                else
-                {
-                    throw new PSArgumentException(String.Format("Dns record type parameter was not an allowed value, {0} was provided.", val));
-                }
-            }
-            else
-            {
-                throw new PSArgumentException("The dns record type parameter does not exist in the dynamic parameter dictionary.");
-            }
         }
 
         #endregion

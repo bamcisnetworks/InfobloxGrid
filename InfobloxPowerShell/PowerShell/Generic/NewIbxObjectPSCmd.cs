@@ -1,64 +1,126 @@
-﻿using BAMCIS.Infoblox.InfobloxMethods;
+﻿using BAMCIS.Infoblox.Common;
+using BAMCIS.Infoblox.InfobloxMethods;
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Management.Automation;
 
 namespace BAMCIS.Infoblox.PowerShell.Generic
 {
     [Cmdlet(
         VerbsCommon.New,
-        "IBXObject",
-        SupportsShouldProcess = true
-        )]
-    public class NewIbxObjectPSCmd : BaseIbxObjectPSCmd, IDynamicParameters
+        "IBXObject"
+    )]
+    public class NewIbxObjectPSCmd : PassThruPSCmd
     {
-        private object _inputObject;
-        private InfoBloxObjectsEnum _type;
+        /* Parameters:
+         * Base: -GridMaster -Credential -Version -Session [Dynamic Params]
+         * InputObject: -InputObject
+         */
 
         #region Parameters
 
+        /// <summary>
+        /// The existing InfobloxSession to use
+        /// </summary>
         [Parameter(
-            Position = 1,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            ParameterSetName = "ByObject",
             Mandatory = true,
-            HelpMessage = "The new object to be created.")]
-        public object InputObject
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_BY_OBJECT
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_BY_ATTRIBUTE
+        )]
+        [ValidateNotNull()]
+        public override InfobloxSession Session
         {
             get
             {
-                return this._inputObject;
+                return base.Session;
             }
             set
             {
-                if (value != null)
-                {
-                    Type type;
-                    if (value.GetType() == typeof(PSObject))
-                    {
-                        PSObject obj = (PSObject)value;
-                        type = obj.BaseObject.GetType();
-                        value = typeof(PSExtensionMethods).GetMethod("ConvertPSObject").MakeGenericMethod(type).Invoke(typeof(PSExtensionMethods), new object[] { obj });
-                    }
-                    else
-                    {
-                        type = value.GetType();
-                    }
+                base.Session = value;
+            }
+        }
 
-                    if (type.IsInfobloxType())
-                    {
-                        this._inputObject = value;
-                    }
-                    else
-                    {
-                        throw new ArgumentException(String.Format("The new object must be an infoblox object type, {0} was provided.", value.GetType().Name));
-                    }
-                }
-                else
-                {
-                    throw new PSArgumentNullException("The new object parameter cannot be null.");
-                }
+        /// <summary>
+        /// The grid master to communicate with. This will be used to build the URL string.
+        /// </summary>
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_BY_ATTRIBUTE
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [ValidateNotNullOrEmpty()]
+        public override string GridMaster
+        {
+            get
+            {
+                return base.GridMaster;
+            }
+            set
+            {
+                base.GridMaster = value;
+            }
+        }
+
+        /// <summary>
+        /// The API version to specify in the URL path. The function to build the URL string for the
+        /// query will add in the leading "v"
+        /// </summary>
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_BY_ATTRIBUTE
+        )]
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [Alias("ApiVersion")]
+        [ValidateSet("LATEST", "1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.4.1", "1.4.2",
+            "1.5", "1.6", "1.6.1", "1.7", "1.7.1", "1.7.2", "1.7.3", "1.7.4", "2.0",
+            "2.1", "2.1.1", "2.2", "2.2.1", "2.2.2", "2.3")]
+        [ValidateNotNullOrEmpty()]
+        public override string Version
+        {
+            get
+            {
+                return base.Version;
+            }
+            set
+            {
+                base.Version = value;
+            }
+        }
+
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_BY_ATTRIBUTE
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [ValidateNotNull()]
+        [System.Management.Automation.Credential()]
+        public override PSCredential Credential
+        {
+            get
+            {
+                return base.Credential;
+            }
+            set
+            {
+                base.Credential = value;
             }
         }
 
@@ -68,19 +130,19 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         {
             base.GetDynamicParameters();
 
-            RuntimeDefinedParameter param = IBXDynamicParameters.ObjectType("ByAttribute", true);
-            base.ParameterDictionary.Add(param.Name, param);
+            RuntimeDefinedParameter Param = IBXDynamicParameters.ObjectType(new string[] { _GRID_BY_ATTRIBUTE, _SESSION_BY_ATTRIBUTE, _ENTERED_SESSION_BY_ATTRIBUTE }, true);
 
-            string objtype = base.GetUnboundValue("ObjectType", 0) as string;
+            base.ParameterDictionary.Add(Param.Name, Param);
 
-            if (!String.IsNullOrEmpty(objtype))
+            string ObjTypeInput = this.GetUnboundValue<string>("ObjectType");
+
+            if (!String.IsNullOrEmpty(ObjTypeInput))
             {
-                if (Enum.TryParse<InfoBloxObjectsEnum>(objtype.ToUpper(), out this._type))
+                if (Enum.TryParse<InfoBloxObjectsEnum>(ObjTypeInput.ToUpper(), out base.ObjectType))
                 {
-                    base.ObjectType = this._type;
-                    foreach (RuntimeDefinedParameter pa in IBXDynamicParameters.ObjectTypeProperties(base.ObjectType, "ByAttribute"))
+                    foreach (RuntimeDefinedParameter RuntimeParam in IBXDynamicParameters.ObjectTypeProperties(base.ObjectType, new string[] { _GRID_BY_ATTRIBUTE, _SESSION_BY_ATTRIBUTE, _ENTERED_SESSION_BY_ATTRIBUTE }))
                     {
-                        base.ParameterDictionary.Add(pa.Name, pa);
+                        base.ParameterDictionary.Add(RuntimeParam.Name, RuntimeParam);
                     }
                 }
             }
@@ -96,17 +158,26 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
         protected override void ProcessRecord()
         {
-
             switch (this.ParameterSetName)
             {
-                case "ByObject":
-                    this.ProcessByObject();
-                    break;
-                case "ByAttribute":
-                    this.ProcessByAttribute();
-                    break;
+                case _GRID_BY_OBJECT:
+                case _SESSION_BY_OBJECT:
+                case _ENTERED_SESSION_BY_OBJECT:
+                    {
+                        this.ProcessByNewObject(this.InputObject);
+                        break;
+                    }
+                case _GRID_BY_ATTRIBUTE:
+                case _SESSION_BY_ATTRIBUTE:
+                case _ENTERED_SESSION_BY_ATTRIBUTE:
+                    {
+                        this.ProcessByAttributeForNewObject("ObjectType");
+                        break;
+                    }
                 default:
-                    throw new PSArgumentException(String.Format("Bad parameter set name: {0}.", this.ParameterSetName));
+                    {
+                        throw new PSArgumentException($"Bad parameter set name: {this.ParameterSetName}.");
+                    }
             }
         }
 
@@ -118,86 +189,6 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         protected override void StopProcessing()
         {
             base.StopProcessing();
-        }
-
-        #endregion
-
-        #region Helper Methods
-
-        private void ProcessByObject()
-        {
-            if (this._inputObject != null)
-            {
-                if (this._inputObject.GetType().IsInfobloxType())
-                {
-                    try
-                    {
-                        base.Response = base.IBX.NewIbxObject(this._inputObject);
-                    }
-                    catch (AggregateException ae)
-                    {
-                        PSCommon.WriteExceptions(ae, this.Host);
-                        this.ThrowTerminatingError(new ErrorRecord(ae.Flatten(), ae.GetType().FullName, ErrorCategory.NotSpecified, this));
-                    }
-                    catch (Exception e)
-                    {
-                        PSCommon.WriteExceptions(e, this.Host);
-                        this.ThrowTerminatingError(new ErrorRecord(e, e.GetType().FullName, ErrorCategory.NotSpecified, this));
-                    }
-                }
-                else
-                {
-                    throw new PSArgumentException("The new object must be a valid infoblox object.");
-                }
-            }
-            else
-            {
-                throw new PSArgumentNullException("InputObject", "The new object cannot be null.");
-            }
-        }
-
-        private void ProcessByAttribute()
-        {
-            if (base.ParameterDictionary.ContainsKey("ObjectType"))
-            {
-                string val = base.ParameterDictionary["ObjectType"].Value as string;
-                if (!String.IsNullOrEmpty(val) && Enum.TryParse<InfoBloxObjectsEnum>(val.ToUpper(), out this._type))
-                {
-                    base.ObjectType = this._type;
-
-                    List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
-                    foreach (KeyValuePair<string, RuntimeDefinedParameter> obj in base.ParameterDictionary)
-                    {
-                        if (obj.Value.Value != null && !String.IsNullOrEmpty(obj.Value.Value as string))
-                        {
-                            list.Add(new KeyValuePair<string, string>(obj.Key, obj.Value.Value as string));
-                        }
-                    }
-
-                    try
-                    {
-                        base.Response = base.IBX.NewIbxObject(base.ObjectType.GetObjectType(), list);
-                    }
-                    catch (AggregateException ae)
-                    {
-                        PSCommon.WriteExceptions(ae, this.Host);
-                        this.ThrowTerminatingError(new ErrorRecord(ae.Flatten(), ae.GetType().FullName, ErrorCategory.NotSpecified, this));
-                    }
-                    catch (Exception e)
-                    {
-                        PSCommon.WriteExceptions(e, this.Host);
-                        this.ThrowTerminatingError(new ErrorRecord(e, e.GetType().FullName, ErrorCategory.NotSpecified, this));
-                    }
-                }
-                else
-                {
-                    throw new PSArgumentException(String.Format("The object type parameter was not an allowed value, {0} was provided.", val));
-                }
-            }
-            else
-            {
-                throw new PSArgumentException("The object type parameter does not exist in the dynamic parameter dictionary.");
-            }
         }
 
         #endregion

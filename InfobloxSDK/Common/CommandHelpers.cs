@@ -33,35 +33,22 @@ namespace BAMCIS.Infoblox.Common
             {
                 HttpClient Client;
                 HttpClientHandler Handler = new HttpClientHandler();
-                Uri Address = new Uri("https://" + gridMaster + "/wapi/" + apiVersion + "/");
-
-                if (CommandHelpers.DoesValidCookieExist())
-                {
-                    Cookie cookie = CommandHelpers.GetValidCookie();
-                    if (cookie != null && !cookie.Expired)
-                    {
-                        CookieContainer Container = new CookieContainer();
-                        Handler.CookieContainer = Container;
-                        Client = new HttpClient(Handler);
-                        Container.Add(Address, cookie);
-                    }
-                    else
-                    {
-                        Client = new HttpClient();
-                        Client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
-                            Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + SecureStringHelper.ToReadableString(password))));
-                    }
-                }
-                else
-                {
-                    Client = new HttpClient();
-                    Client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
-                        Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + SecureStringHelper.ToReadableString(password))));
-                }
-
-                Client.BaseAddress = Address;
-                Client.Timeout = TimeSpan.FromSeconds(30);
                 Handler.ServerCertificateCustomValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+                if (!apiVersion.StartsWith("v"))
+                {
+                    apiVersion = $"v{apiVersion}";
+                }
+
+                Client = new HttpClient(Handler)
+                {
+                    BaseAddress = new Uri("https://" + gridMaster + "/wapi/" + apiVersion + "/"),
+                    Timeout = TimeSpan.FromSeconds(30),
+
+                };
+
+                Client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
+                    Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + SecureStringHelper.ToReadableString(password))));
 
                 return Client;
             }
@@ -77,27 +64,29 @@ namespace BAMCIS.Infoblox.Common
             {
                 HttpClient Client;
 
-                if (CommandHelpers.DoesValidCookieExist())
+                if (InfobloxSessionData.UseSessionData)
                 {
-                    Cookie cookie = CommandHelpers.GetValidCookie();
-                    if (cookie != null && !cookie.Expired)
+ 
+                    if (InfobloxSessionData.Cookie != null && !InfobloxSessionData.Cookie.Expired)
                     {
-                        CookieContainer Container = new CookieContainer();
-                        HttpClientHandler Handler = new HttpClientHandler() { CookieContainer = Container };
-
-                        Client = new HttpClient(Handler);                
-                        Client.BaseAddress = new Uri("https://" + gridMaster + "/wapi/" + apiVersion + "/");
-                        Container.Add(Client.BaseAddress, cookie);
+                        HttpClientHandler Handler = new HttpClientHandler() { CookieContainer = new CookieContainer() };
 
                         if (!apiVersion.StartsWith("v"))
                         {
                             apiVersion = $"v{apiVersion}";
                         }
 
-                        Client.BaseAddress = new Uri("https://" + gridMaster + "/wapi/" + apiVersion + "/");
-                        Client.Timeout = TimeSpan.FromSeconds(30);
+                        Uri Address = new Uri("https://" + gridMaster + "/wapi/" + apiVersion + "/");
+
+                        Handler.CookieContainer.Add(Address, InfobloxSessionData.Cookie);
 
                         Handler.ServerCertificateCustomValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+                        Client = new HttpClient(Handler)
+                        {
+                            BaseAddress = Address,
+                            Timeout = TimeSpan.FromSeconds(30)
+                        };
 
                         return Client;
                     }
@@ -109,6 +98,53 @@ namespace BAMCIS.Infoblox.Common
                 else
                 {
                     throw new Exception("There is not a valid cookie to utilize, you must specify a credential.");
+                }
+            }
+            else
+            {
+                throw new WebException("The grid master could not be contacted.");
+            }
+        }
+
+        public static async Task<HttpClient> BuildHttpClient(string gridMaster, string apiVersion, Cookie cookie)
+        {
+            if (await CommandHelpers.CheckConnection(gridMaster))
+            {
+                HttpClient Client;
+
+                if (cookie != null)
+                {
+                    if (!cookie.Expired)
+                    {
+                        HttpClientHandler Handler = new HttpClientHandler() { CookieContainer = new CookieContainer() };
+
+                        if (!apiVersion.StartsWith("v"))
+                        {
+                            apiVersion = $"v{apiVersion}";
+                        }
+
+                        Uri Address = new Uri("https://" + gridMaster + "/wapi/" + apiVersion + "/");
+
+                        Handler.CookieContainer.Add(Address, cookie);
+
+                        Handler.ServerCertificateCustomValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+                        Client = new HttpClient(Handler)
+                        {
+                            BaseAddress = Address,
+                            Timeout = TimeSpan.FromSeconds(30)
+                        };
+
+                        return Client;
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"The provided cookie is expired, it expired on {cookie.Expires.ToUniversalTime().ToString()} UTC");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentNullException("cookie", "Cookie cannot be null");
                 }
             }
             else
@@ -137,33 +173,34 @@ namespace BAMCIS.Infoblox.Common
         /// <summary>
         /// Builds a full URL search request including the object type, the query, and the fields to return.
         /// </summary>
-        /// <param name="ResourceType">An actual infoblox class type.</param> 
-        /// <param name="Search">The type of search to be performed.</param>
-        /// <param name="SearchField">The field to search on.</param> 
-        /// <param name="RecordValue">The value to search for.</param> 
+        /// <param name="resourceType">An actual infoblox class type.</param> 
+        /// <param name="searchType">The type of search to be performed.</param>
+        /// <param name="searchField">The field to search on.</param> 
+        /// <param name="recordValue">The value to search for.</param> 
         /// <returns></returns>
-        public static string BuildGetSearchRequest(Type ResourceType, SearchType Search, string SearchField, string RecordValue)
+        internal static string BuildGetSearchRequest(Type resourceType, SearchType searchType, string searchField, string recordValue)
         {
-            if (ExtensionMethods.IsInfobloxType(ResourceType))
+            if (ExtensionMethods.IsInfobloxType(resourceType))
             {
-                IEnumerable<string> fieldsToReturn = ResourceType.GetTypeInfo().GetProperties().Where(x => ! x.IsAttributeDefined<NotReadableAttribute>()).Select(x => x.Name).ToList();
+                IEnumerable<string> FieldsToReturn = resourceType.GetTypeInfo().GetProperties().Where(x => !x.IsAttributeDefined<NotReadableAttribute>()).Select(x => x.Name).ToList();
 
-                fieldsToReturn = RefObject.RemoveRefProperty(fieldsToReturn);
+                FieldsToReturn = RefObject.RemoveRefProperty(FieldsToReturn);
 
-                string fields = String.Join(",", fieldsToReturn);
+                string Fields = String.Join(",", FieldsToReturn);
 
-                MemberInfo[] info = typeof(SearchType).GetTypeInfo().GetMember(Search.ToString());
-                if (info != null && info.Length > 0)
+                MemberInfo[] Info = typeof(SearchType).GetTypeInfo().GetMember(searchType.ToString());
+
+                if (Info != null && Info.Length > 0)
                 {
-                    string searchOperator = info[0].GetCustomAttribute<DescriptionAttribute>().Description;
+                    string searchOperator = Info[0].GetCustomAttribute<DescriptionAttribute>().Description;
 
-                    if (SearchableAttribute.SearchTypeAllowed(ResourceType, Search, SearchField))
+                    if (SearchableAttribute.SearchTypeAllowed(resourceType, searchType, searchField))
                     {
-                        return ResourceType.GetNameAttribute() + "?" + SearchField.ToLower() + searchOperator + RecordValue + "&" + "_return_fields%2B=" + fields;
+                        return resourceType.GetNameAttribute() + "?" + searchField.ToLower() + searchOperator + recordValue + "&" + "_return_fields%2B=" + Fields;
                     }
                     else
                     {
-                        throw new Exception("The search type " + Search.ToString() + " is not allowed on field " + SearchField);
+                        throw new Exception("The search type " + searchType.ToString() + " is not allowed on field " + searchField);
                     }
                 }
                 else
@@ -185,19 +222,19 @@ namespace BAMCIS.Infoblox.Common
         /// <param name="SearchField">The field to search on.</param>
         /// <param name="RecordValue">The value to search for.</param>
         /// <returns></returns>
-        public static string BuildGetSearchRequest<T>(SearchType Search, string SearchField, string RecordValue)
+        internal static string BuildGetSearchRequest<T>(SearchType Search, string SearchField, string RecordValue)
         {
             return CommandHelpers.BuildGetSearchRequest(typeof(T), Search, SearchField, RecordValue);
         }
 
-        public static string BuildGetRequest<T>(string reference)
+        internal static string BuildGetRequest<T>(string reference)
         {
-            //%2B is a plus sign
+            //%2B is a plus sign, which indicates the basic fields in addition to the requested fields will be returned
             return reference + "?_return_fields%2B=" + String.Join(",", RefObject.RemoveRefProperty(
-                        typeof(T).GetTypeInfo().GetProperties().Where(x => x.IsAttributeDefined<NotReadableAttribute>()).Select(x => x.Name).ToList()));
+                        typeof(T).GetTypeInfo().GetProperties().Where(x => !x.IsAttributeDefined<NotReadableAttribute>()).Select(x => x.Name).ToList()));
         }
 
-        public static string ParsePostPutDeleteResponse(HttpResponseMessage response)
+        internal static string ParsePostPutDeleteResponse(HttpResponseMessage response)
         {
             CommandHelpers.ProcessResponseCookies(response);
 
@@ -211,7 +248,7 @@ namespace BAMCIS.Infoblox.Common
             }
         }
 
-        public static T ParseGetResponse<T>(HttpResponseMessage response)
+        internal static T ParseGetResponse<T>(HttpResponseMessage response)
         {
             CommandHelpers.ProcessResponseCookies(response);
 
@@ -225,7 +262,7 @@ namespace BAMCIS.Infoblox.Common
             }
         }
 
-        public static object ParseGetResponse(HttpResponseMessage response, Type type)
+        internal static object ParseGetResponse(HttpResponseMessage response, Type type)
         {
             CommandHelpers.ProcessResponseCookies(response);
 
@@ -239,7 +276,7 @@ namespace BAMCIS.Infoblox.Common
             }
         }
 
-        public static void ProcessResponseCookies(HttpResponseMessage response)
+        private static void ProcessResponseCookies(HttpResponseMessage response)
         {
             if (!CommandHelpers.IsRequestCookieStillValid(response.RequestMessage))
             {
@@ -250,7 +287,7 @@ namespace BAMCIS.Infoblox.Common
         private static string GetCookiePath()
         {
 #if NETSTANDARD
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Microsoft", "Windows", "INetCookies", "infoblox.txt");
             }
@@ -265,12 +302,13 @@ namespace BAMCIS.Infoblox.Common
 
         public static bool DoesValidCookieExist()
         {
-            string path = GetCookiePath();
-            if (File.Exists(path))
+            string Path = GetCookiePath();
+
+            if (File.Exists(Path))
             {
                 try
                 {
-                    Cookie cookie = JsonConvert.DeserializeObject<Cookie>(File.ReadAllText(path));
+                    Cookie cookie = JsonConvert.DeserializeObject<Cookie>(File.ReadAllText(Path));
                     return !cookie.Expired;
                 }
                 catch (Exception)
@@ -282,37 +320,30 @@ namespace BAMCIS.Infoblox.Common
             return false;
         }
 
-        public static Cookie GetValidCookie()
-        {
-            if (CommandHelpers.DoesValidCookieExist())
-            {
-                string path = GetCookiePath();
-                return JsonConvert.DeserializeObject<Cookie>(File.ReadAllText(path));
-            }
-            else
-            {
-                return null;
-            }     
-        }
 
         private static bool IsRequestCookieStillValid(HttpRequestMessage request)
         {
-            IEnumerable<string> requestCookies;
-            if (request.Headers.TryGetValues("Cookie", out requestCookies))
+            IEnumerable<string> RequestCookies;
+
+            if (request.Headers.TryGetValues("Cookie", out RequestCookies))
             {
-                if (requestCookies != null && requestCookies.Count() > 0)
+                if (RequestCookies != null && RequestCookies.Any())
                 {
-                    string temp = requestCookies.FirstOrDefault(x => x.StartsWith("ibapauth"));
-                    if (!String.IsNullOrEmpty(temp))
+                    string Temp = RequestCookies.FirstOrDefault(x => x.StartsWith("ibapauth"));
+
+                    if (!String.IsNullOrEmpty(Temp))
                     {
-                        string[] requestCookieParts = temp.Split(';');
-                        if (requestCookieParts.Count() > 0)
+                        string[] RequestCookieParts = Temp.Split(';');
+
+                        if (RequestCookieParts.Any())
                         {
-                            string expires = requestCookieParts.FirstOrDefault(x => x.StartsWith("Expires"));
-                            DateTime date;
-                            if (DateTime.TryParse(expires, out date))
+                            string Expires = RequestCookieParts.FirstOrDefault(x => x.StartsWith("Expires"));
+
+                            DateTime Date;
+
+                            if (DateTime.TryParse(Expires, out Date))
                             {
-                                return DateTime.Now < date;
+                                return DateTime.Now < Date;
                             }
                         }
                     }
@@ -324,20 +355,24 @@ namespace BAMCIS.Infoblox.Common
 
         private static void SetCookieFromResponse(HttpResponseMessage response)
         {
-            IEnumerable<string> cookies;
-            response.Headers.TryGetValues("Set-Cookie", out cookies);
+            IEnumerable<string> Cookies;
 
-            if (cookies != null && cookies.Count() > 0)
+            response.Headers.TryGetValues("Set-Cookie", out Cookies);
+
+            if (Cookies != null && Cookies.Count() > 0)
             {
-                string[] cookieParts = cookies.FirstOrDefault(x => x.StartsWith("ibapauth")).Split(';');
-                if (cookieParts.Count() > 0)
+                string[] CookieParts = Cookies.FirstOrDefault(x => x.StartsWith("ibapauth")).Split(';');
+
+                if (CookieParts.Any())
                 {
-                    if (!String.IsNullOrEmpty(cookieParts[0]))
+                    if (!String.IsNullOrEmpty(CookieParts[0]))
                     {
-                        Cookie cookie = new Cookie("ibapauth", cookieParts[0].Replace("ibapauth=", ""), "", response.RequestMessage.RequestUri.Host);
-                        cookie.Expires = DateTime.Now.AddMinutes(10);
-                        cookie.Secure = true;
-                        File.WriteAllText(GetCookiePath(), JsonConvert.SerializeObject(cookie));
+                        Cookie Cookie = new Cookie("ibapauth", CookieParts[0].Replace("ibapauth=", ""), "", response.RequestMessage.RequestUri.Host)
+                        {
+                            Secure = true
+                        };
+
+                        InfobloxSessionData.Cookie = Cookie;
                     }
                 }
             }

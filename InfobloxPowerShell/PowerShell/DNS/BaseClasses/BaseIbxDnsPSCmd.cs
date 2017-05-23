@@ -2,11 +2,10 @@
 using BAMCIS.Infoblox.PowerShell.Generic;
 using System;
 using System.Management.Automation;
-using System.Security;
 
 namespace BAMCIS.Infoblox.PowerShell.DNS
 {
-    public class BaseIbxDnsPSCmd : BaseIbxObjectPSCmd
+    public abstract class BaseIbxDnsPSCmd : BaseIbxObjectPSCmd
     {
         private DnsMethods _ibx;
 
@@ -27,13 +26,21 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
         {
             try
             {
-                if (base.Credential == null)
+                if (this.ParameterSetName.StartsWith(_GRID))
                 {
-                    this._ibx = new DnsMethods(base.GridMaster, base.Version);
+                    this._ibx = new DnsMethods(this.GridMaster, this.Version, this.Credential.UserName, this.Credential.Password);
+                }
+                else if (this.ParameterSetName.StartsWith(_SESSION))
+                {
+                    this._ibx = new DnsMethods(this.Session);
+                }
+                else if (this.ParameterSetName.StartsWith(_ENTERED_SESSION))
+                {
+                    this._ibx = new DnsMethods();
                 }
                 else
                 {
-                    this._ibx = new DnsMethods(base.GridMaster, base.Version, base.Credential.UserName, base.Credential.Password);
+                    this.ThrowTerminatingError(new ErrorRecord(new PSArgumentException($"Could not identify parameter set from {this.ParameterSetName}"), "PSArgumentException", ErrorCategory.InvalidArgument, this));
                 }
             }
             catch (AggregateException ae)

@@ -1,60 +1,158 @@
-﻿using BAMCIS.Infoblox.InfobloxMethods;
+﻿using BAMCIS.Infoblox.Common;
 using System;
-using System.Collections.ObjectModel;
+using System.IO;
 using System.Management.Automation;
-using System.Management.Automation.Host;
 
 namespace BAMCIS.Infoblox.PowerShell.Generic
 {
     [Cmdlet(
         VerbsCommon.Remove,
         "IBXObject",
-        SupportsShouldProcess = true
-        )]
-    public class RemoveIbxObjectPSCmd : BaseIbxObjectPSCmd
+        SupportsShouldProcess = true,
+        ConfirmImpact = ConfirmImpact.High,
+        DefaultParameterSetName = _ENTERED_SESSION_REFERENCE
+    )]
+    public class RemoveIbxObjectPSCmd : ForcePSCmd
     {
-        private bool _force;
+        /* Parameters:
+         * Base: -GridMaster -Credential -Version -Session [Dynamic Params]
+         * InputObject: -InputObject
+         * PassThru: -PassThru
+         * Force: -Force
+         */
 
         #region Parameters
 
+        /// <summary>
+        /// The existing InfobloxSession to use
+        /// </summary>
         [Parameter(
-            Position = 1,
-            ValueFromPipelineByPropertyName = true,
             Mandatory = true,
-            HelpMessage = "The object reference string to delete.")]
-        public string Reference
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_BY_OBJECT
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_REFERENCE
+        )]
+        [ValidateNotNull()]
+        public override InfobloxSession Session
         {
             get
             {
-                return base.Ref;
+                return base.Session;
             }
             set
             {
-                if (!String.IsNullOrEmpty(value))
-                {
-                    base.Ref = value;
-                }
-                else
-                {
-                    throw new PSArgumentNullException("Reference", "The reference cannot be null or empty.");
-                }
+                base.Session = value;
+            }
+        }
+
+        /// <summary>
+        /// The grid master to communicate with. This will be used to build the URL string.
+        /// </summary>
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_REFERENCE
+        )]
+        [ValidateNotNullOrEmpty()]
+        public override string GridMaster
+        {
+            get
+            {
+                return base.GridMaster;
+            }
+            set
+            {
+                base.GridMaster = value;
+            }
+        }
+
+        /// <summary>
+        /// The API version to specify in the URL path. The function to build the URL string for the
+        /// query will add in the leading "v"
+        /// </summary>
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_REFERENCE
+        )]
+        [Alias("ApiVersion")]
+        [ValidateSet("LATEST", "1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.4.1", "1.4.2",
+            "1.5", "1.6", "1.6.1", "1.7", "1.7.1", "1.7.2", "1.7.3", "1.7.4", "2.0",
+            "2.1", "2.1.1", "2.2", "2.2.1", "2.2.2", "2.3")]
+        [ValidateNotNullOrEmpty()]
+        public override string Version
+        {
+            get
+            {
+                return base.Version;
+            }
+            set
+            {
+                base.Version = value;
             }
         }
 
         [Parameter(
-            Mandatory = false,
-            HelpMessage = "Bypasses the confirmation prompty."
-            )
-        ]
-        public SwitchParameter Force
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_REFERENCE
+        )]
+        [ValidateNotNull()]
+        [System.Management.Automation.Credential()]
+        public override PSCredential Credential
         {
             get
             {
-                return this._force;
+                return base.Credential;
             }
             set
             {
-                this._force = value;
+                base.Credential = value;
+            }
+        }
+
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The object reference string to delete.",
+            ParameterSetName = _GRID_REFERENCE
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The object reference string to delete.",
+            ParameterSetName = _SESSION_REFERENCE
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The object reference string to delete.",
+            ParameterSetName = _ENTERED_SESSION_REFERENCE
+        )]
+        [ValidateNotNullOrEmpty()]
+        public string Reference
+        {
+            get
+            {
+                return base._Ref;
+            }
+            set
+            {
+                base._Ref = value;
             }
         }
 
@@ -68,21 +166,19 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
         protected override void ProcessRecord()
         {
-            int choice = 0;
-            if (!this._force)
+            //Use base._Ref since the user can provide an input object that sets it
+            if (base._Force == true || ShouldProcess($"{base._Ref}", $"Delete"))
             {
-                ChoiceDescription yes = new ChoiceDescription("&Yes", "Will delete the object.");
-                ChoiceDescription no = new ChoiceDescription("&No", "Will cancel the action.");
-                Collection<ChoiceDescription> choices = new Collection<ChoiceDescription>() { yes, no };
-                choice = Host.UI.PromptForChoice("Delete Infoblox Object", ("Are you sure you want to delete " + base.Ref + " ?"), choices, 0);
-            }
+                if (base._Force == true || ShouldContinue($"Do you want to delete the IBX Object {base._Ref}?", "Deleting IBX Object"))
+                {
+                    StringWriter SWriter = new StringWriter();
+                    TextWriter OriginalOut = Console.Out;
+                    Console.SetOut(SWriter);
 
-            switch (choice)
-            {
-                case 0:
                     try
                     {
-                        base.Response = base.IBX.DeleteIbxObject(base.Ref);
+                        base.Response = base.IBX.DeleteIbxObject(base._Ref).Result;
+                        base.FinishResponse(this.PassThru);
                     }
                     catch (AggregateException ae)
                     {
@@ -94,11 +190,12 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                         PSCommon.WriteExceptions(e, this.Host);
                         this.ThrowTerminatingError(new ErrorRecord(e, e.GetType().FullName, ErrorCategory.NotSpecified, this));
                     }
-                    break;
-                default:
-                case 1:
-                    WriteWarning("You cancelled the command.");
-                    break;
+                    finally
+                    {
+                        WriteVerbose(SWriter.ToString());
+                        Console.SetOut(OriginalOut);
+                    }
+                }
             }
         }
 

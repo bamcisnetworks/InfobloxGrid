@@ -1,10 +1,4 @@
-﻿#if (NETSTANDARD2_0 || NETSTANDARD1_6 || NETSTANDARD1_5 || NETSTANDARD1_4 || NETSTANDARD1_3 || NETSTANDARD1_2 || NETSTANDARD1_1 || NETSTANDARD1_0)
-#define NETSTANDARD 
-#else
-#define NET
-#endif
-
-using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Common;
 using BAMCIS.Infoblox.Common.BaseObjects;
 using System;
 using System.Collections.Generic;
@@ -19,13 +13,65 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 {
     public class IBXCommonMethods
     {
-        private HttpClient _client;
+        private HttpClient _Client;
 
         public HttpClient Client
         {
             get
             {
-                return this._client;
+                return this._Client;
+            }
+        }
+
+        public IBXCommonMethods()
+        {
+            if (InfobloxSessionData.UseSessionData)
+            {
+                if (!InfobloxSessionData.Cookie.Expired)
+                {
+                    this._Client = CommandHelpers.BuildHttpClient(InfobloxSessionData.GridMaster, InfobloxSessionData.Version, InfobloxSessionData.Cookie).Result;
+                }
+                else
+                {
+                    if (InfobloxSessionData.Credential != null)
+                    {
+                        this._Client = CommandHelpers.BuildHttpClient(InfobloxSessionData.GridMaster, InfobloxSessionData.Version, InfobloxSessionData.Credential.UserName, InfobloxSessionData.Credential.Password).Result;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("The session parameter did not contain a valid cookie and a null credential.", "session");
+                    }
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Cannot use the default constructor because the session data for Infoblox has not been set.");
+            }
+        }
+
+        public IBXCommonMethods(InfobloxSession session)
+        {
+            if (session != null)
+            {
+                if (session.Cookie != null && !session.Cookie.Expired)
+                {
+                    this._Client = CommandHelpers.BuildHttpClient(session.GridMaster, session.Version, session.Cookie).Result;
+                }
+                else
+                {
+                    if (session.Credential != null)
+                    {
+                        this._Client = CommandHelpers.BuildHttpClient(session.GridMaster, session.Version, session.Credential.UserName, session.Credential.Password).Result;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("The session parameter did not contain a valid cookie and a null credential.", "session");
+                    }
+                }
+            }
+            else
+            {
+                throw new ArgumentNullException("session", "The session object cannot be null.");
             }
         }
 
@@ -33,24 +79,19 @@ namespace BAMCIS.Infoblox.InfobloxMethods
         {
             if (String.IsNullOrEmpty(username) || password == null)
             {
-                this._client = CommandHelpers.BuildHttpClient(gridMaster, apiVersion).Result;
+                this._Client = CommandHelpers.BuildHttpClient(gridMaster, apiVersion).Result;
             }
             else
             {
-                this._client = CommandHelpers.BuildHttpClient(gridMaster, apiVersion, username, password).Result;
+                this._Client = CommandHelpers.BuildHttpClient(gridMaster, apiVersion, username, password).Result;
             }
         }
 
-        public IBXCommonMethods(string gridMaster, string apiVersion)
-        {
-            this._client = CommandHelpers.BuildHttpClient(gridMaster, apiVersion).Result;
-        }
-
-        public T SearchIbxObject<T>(SearchType searchType, string searchField, string value)
+        public async Task<T> SearchIbxObject<T>(SearchType searchType, string searchField, string value)
         {
             if (ExtensionMethods.IsInfobloxType<T>())
             {
-                return this.GetAsync<T>(CommandHelpers.BuildGetSearchRequest<T>(searchType, searchField, value)).Result;
+                return await this.GetAsync<T>(CommandHelpers.BuildGetSearchRequest<T>(searchType, searchField, value));
             }
             else
             {
@@ -58,13 +99,13 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public T GetIbxObject<T>(string reference)
+        public async Task<T> GetIbxObject<T>(string reference)
         {
             if (ExtensionMethods.IsInfobloxType<T>())
             {
                 if (!String.IsNullOrEmpty(reference))
                 {
-                    return this.GetAsync<T>(CommandHelpers.BuildGetRequest<T>(reference)).Result;
+                    return await this.GetAsync<T>(CommandHelpers.BuildGetRequest<T>(reference));
                 }
                 else
                 {
@@ -77,13 +118,13 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string NewIbxObject(Type type, string json)
+        public async Task<string> NewIbxObject(Type type, string json)
         {
             if (type.IsInfobloxType())
             {
                 if (!String.IsNullOrEmpty(json))
                 {
-                    return this.PostAsync(type.GetNameAttribute(), json).Result;
+                    return await this.PostAsync(type.GetNameAttribute(), json);
                 }
                 else
                 {
@@ -96,17 +137,17 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string NewIbxObject(dynamic ibxObject)
+        public async Task<string> NewIbxObject(dynamic ibxObject)
         {
             if (ibxObject != null)
             {
                 if (ExtensionMethods.IsInfobloxType(ibxObject.GetType()))
                 {
-                    return this.PostAsync(ExtensionMethods.GetNameAttribute(ibxObject), ExtensionMethods.PrepareObjectForSend(ibxObject)).Result;
+                    return await this.PostAsync(ExtensionMethods.GetNameAttribute(ibxObject), ExtensionMethods.PrepareObjectForSend(ibxObject));
                 }
                 else
                 {
-                    throw new ArgumentException(String.Format("The type must be a valid infoblox object type, {0} was provided.", ibxObject.GetType().Name));
+                    throw new ArgumentException($"The type must be a valid infoblox object type, {ibxObject.GetType().FullName} was provided.");
                 }
             }
             else
@@ -115,13 +156,13 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string NewIbxObject(Type type, IEnumerable<KeyValuePair<string, string>> args)
+        public async Task<string> NewIbxObject(Type type, IEnumerable<KeyValuePair<string, string>> args)
         {
             if (type.IsInfobloxType())
             {
-                if (args.Count() > 0)
+                if (args.Any())
                 {
-                    return this.PostAsync(type.GetNameAttribute(), ExtensionMethods.PrepareArgsForSend(type, args)).Result;
+                    return await this.PostAsync(type.GetNameAttribute(), ExtensionMethods.PrepareArgsForSend(type, args));
                 }
                 else
                 {
@@ -130,11 +171,11 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
             else
             {
-                throw new ArgumentException(String.Format("The type must be a valid infoblox object type, {0} was provided.", type.Name));
+                throw new ArgumentException($"The type must be a valid infoblox object type, {type.FullName} was provided.");
             }
         }
 
-        public string UpdateIbxObject(dynamic ibxObject, bool RemoveEmpty = true)
+        public async Task<string> UpdateIbxObject(dynamic ibxObject, bool RemoveEmpty = true)
         {
             if (ExtensionMethods.IsInfobloxType(ibxObject.GetType()))
             {
@@ -144,22 +185,22 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
                     if (prop != null)
                     {
-                        string reference = prop.GetValue(ibxObject) as string;
+                        string Reference = prop.GetValue(ibxObject) as string;
 
-                        if (!String.IsNullOrEmpty(reference))
+                        if (!String.IsNullOrEmpty(Reference))
                         {
-                            string json = String.Empty;
+                            string Json = String.Empty;
 
                             if (RemoveEmpty)
                             {
-                                json = ExtensionMethods.PrepareObjectForSend(ibxObject);
+                                Json = ExtensionMethods.PrepareObjectForSend(ibxObject);
                             }
                             else
                             {
-                                json = ExtensionMethods.PrepareObjectForSendWithEmptyProperties(ibxObject);
+                                Json = ExtensionMethods.PrepareObjectForSendWithEmptyProperties(ibxObject);
                             }
 
-                            return this.PutAsync(reference, json).Result;
+                            return await this.PutAsync(Reference, Json);
                         }
                         else
                         {
@@ -168,7 +209,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                     }
                     else
                     {
-                        throw new ArgumentException("The updated object must contain a valid _ref property data cannot be null.");
+                        throw new ArgumentException("The updated object must contain a valid _ref property.");
                     }
                 }
                 else
@@ -182,7 +223,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string UpdateIbxObject(Type type, string reference, IEnumerable<KeyValuePair<string, string>> args)
+        public async Task<string> UpdateIbxObject(Type type, string reference, IEnumerable<KeyValuePair<string, string>> args)
         {
             if (type.IsInfobloxType())
             {
@@ -190,7 +231,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                 {
                     if (!String.IsNullOrEmpty(reference))
                     {
-                        return this.PutAsync(reference, ExtensionMethods.PrepareArgsForSend(type, args)).Result;
+                        return await this.PutAsync(reference, ExtensionMethods.PrepareArgsForSend(type, args));
                     }
                     else
                     {
@@ -209,7 +250,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string UpdateIbxObject<T>(T ibxObject, bool RemoveEmpty = true) where T : RefObject
+        public async Task<string> UpdateIbxObject<T>(T ibxObject, bool RemoveEmpty = true) where T : RefObject
         {
             if (ExtensionMethods.IsInfobloxType<T>())
             {
@@ -234,7 +275,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                                 json = ExtensionMethods.PrepareObjectForSendWithEmptyProperties(ibxObject);
                             }
 
-                            return this.PutAsync(reference, json).Result;
+                            return await this.PutAsync(reference, json);
                         }
                         else
                         {
@@ -257,7 +298,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string UpdateIbxObject<T>(string url, string data)
+        public async Task<string> UpdateIbxObject<T>(string url, string data)
         {
             if (ExtensionMethods.IsInfobloxType<T>())
             {
@@ -265,7 +306,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                 {
                     if (!String.IsNullOrEmpty(url))
                     {
-                        return this.PutAsync(url, data).Result;
+                        return await this.PutAsync(url, data);
                     }
                     else
                     {
@@ -283,11 +324,11 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string DeleteIbxObject(string reference)
+        public async Task<string> DeleteIbxObject(string reference)
         {
             if (!String.IsNullOrEmpty(reference))
             {
-                return this.DeleteAsync(reference).Result;
+                return await this.DeleteAsync(reference);
             }
             else
             {
@@ -299,11 +340,13 @@ namespace BAMCIS.Infoblox.InfobloxMethods
         {
             if (!String.IsNullOrEmpty(url))
             {
-                return CommandHelpers.ParseGetResponse<T>(await this._client.GetAsync(url.Replace(":", "%3a")));
+                string Url = url.Replace(":", "%3a");
+                Console.WriteLine($"{this._Client.BaseAddress.ToString()}{Url}");
+                return CommandHelpers.ParseGetResponse<T>(await this._Client.GetAsync(Url));
             }
             else
             {
-                throw new ArgumentNullException("reference", "Reference data cannot be null or empty.");
+                throw new ArgumentNullException("url", "The url string cannot be null or empty.");
             }
         }
 
@@ -313,7 +356,10 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             {
                 if (!String.IsNullOrEmpty(data))
                 {
-                    return CommandHelpers.ParsePostPutDeleteResponse(await this.Client.PostAsync(url.Replace(":", "%3a"), new StringContent(data, Encoding.UTF8, "application/json")));
+                    string Url = url.Replace(":", "%3a");
+                    Console.WriteLine($"{this._Client.BaseAddress.ToString()}{Url}");
+                    Console.WriteLine(data);
+                    return CommandHelpers.ParsePostPutDeleteResponse(await this.Client.PostAsync(Url, new StringContent(data, Encoding.UTF8, "application/json")));
                 }
                 else
                 {
@@ -330,7 +376,10 @@ namespace BAMCIS.Infoblox.InfobloxMethods
         {
             if (!String.IsNullOrEmpty(url))
             {
-                return CommandHelpers.ParsePostPutDeleteResponse(await this._client.PutAsync(url.Replace(":", "%3a"), new StringContent(data, Encoding.UTF8, "application/json")));
+                string Url = url.Replace(":", "%3a");
+                Console.WriteLine($"{this._Client.BaseAddress.ToString()}{Url}");
+                Console.WriteLine(data);
+                return CommandHelpers.ParsePostPutDeleteResponse(await this._Client.PutAsync(Url, new StringContent(data, Encoding.UTF8, "application/json")));
             }
             else
             {
@@ -342,14 +391,16 @@ namespace BAMCIS.Infoblox.InfobloxMethods
         {
             if (!String.IsNullOrEmpty(reference))
             {
-                return CommandHelpers.ParsePostPutDeleteResponse(await this._client.DeleteAsync(reference.Replace(":", "%3a")));
+                string Url = reference.Replace(":", "%3a");
+                Console.WriteLine($"{this._Client.BaseAddress.ToString()}{Url}");
+                return CommandHelpers.ParsePostPutDeleteResponse(await this._Client.DeleteAsync(Url));
             }
             else
             {
                 throw new ArgumentNullException("reference", "Reference data cannot be null or empty.");
             }
         }
-       
+
         public static IEnumerable<InfoBloxObjectsEnum> GetDnsRecordTypes()
         {
             return Enum.GetValues(typeof(InfoBloxObjectsEnum)).Cast<InfoBloxObjectsEnum>().Where(x => !String.IsNullOrEmpty(x.GetName()) && x.GetName().StartsWith("record:"));

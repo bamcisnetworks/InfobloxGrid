@@ -6,6 +6,7 @@
 
         [Required]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public virtual string name
         {
             get

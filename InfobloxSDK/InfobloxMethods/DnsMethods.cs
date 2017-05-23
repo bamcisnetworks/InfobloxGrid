@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using BAMCIS.Infoblox.Common;
 using System.Net;
 using BAMCIS.Infoblox.InfobloxObjects.DNS;
+using System.Threading.Tasks;
 
 namespace BAMCIS.Infoblox.InfobloxMethods
 {
@@ -13,13 +14,15 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
         public DnsMethods(string gridMaster, string apiVersion, string username, SecureString password) : base(gridMaster, apiVersion, username, password) {}
 
-        public DnsMethods(string gridMaster, string apiVersion) : base(gridMaster, apiVersion) { }
+        public DnsMethods(InfobloxSession session) : base(session) { }
+
+        public DnsMethods() : base() { }
 
         #endregion
 
         #region Host Records
 
-        public string NewDnsHostRecord(string HostName, string IPAddress, bool AddToDns = true, bool EnableDHCP = false, bool SetHostName = false, string mac = "")
+        public async Task<string> NewDnsHostRecord(string HostName, string IPAddress, bool AddToDns = true, bool EnableDHCP = false, bool SetHostName = false, string mac = "")
         {
             string ip = String.Empty;
             string fqdn = String.Empty;
@@ -34,7 +37,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                     ((SetHostName) ? ",\"options\":[{\"name\":\"host-name\",\"num\":12,\"value\":\"" + fqdn + "\"}]" : "") +
                     "}],\"configure_for_dns\":" + AddToDns.ToString().ToLower() + "}";
 
-                return base.NewIbxObject(typeof(host), data);
+                return await base.NewIbxObject(typeof(host), data);
             }
             else
             {
@@ -42,7 +45,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string NewDnsHostRecordWithNextAvailableIP(string HostName, string Network, bool AddToDns = true, bool EnableDHCP = false, bool SetHostName = false, string mac = "")
+        public async Task<string> NewDnsHostRecordWithNextAvailableIP(string HostName, string Network, bool AddToDns = true, bool EnableDHCP = false, bool SetHostName = false, string mac = "")
         {
             string formattedMAC = String.Empty;
             string formattedFQDN = String.Empty;
@@ -55,7 +58,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                     ((SetHostName) ? ",\"options\":[{\"name\":\"host-name\",\"num\":12,\"value\":\"" + formattedFQDN + "\"}]" : "") + "}]" +
                     ",\"configure_for_dns\":" + AddToDns.ToString().ToLower() + "}";
 
-                return base.NewIbxObject(typeof(host), data);
+                return await base.NewIbxObject(typeof(host), data);
             }
             else
             {
@@ -63,7 +66,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string SetDnsHostRecordIP(string reference, string ipAddress, bool EnableDHCP = false, bool SetHostName = true, string mac = "")
+        public async Task<string> SetDnsHostRecordIP(string reference, string ipAddress, bool EnableDHCP = false, bool SetHostName = true, string mac = "")
         {
             if (!String.IsNullOrEmpty(reference))
             {
@@ -76,7 +79,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
                     if (SetHostName)
                     {
-                        host Host = GetIbxObject<host>(reference);
+                        host Host = await GetIbxObject<host>(reference);
                         hostName = Host.name;
                     }
 
@@ -86,7 +89,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                         ((SetHostName) ? ",\"options\":[{\"name\":\"host-name\",\"num\":12,\"value\":\"" + hostName + "\"}]" : "") +
                         "}]}";
 
-                    return base.UpdateIbxObject<host>(reference, data);
+                    return await base.UpdateIbxObject<host>(reference, data);
                 }
                 else
                 {
@@ -99,7 +102,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string SetDnsHostRecordName(string reference, string HostName)
+        public async Task<string> SetDnsHostRecordName(string reference, string HostName)
         {
             if (!String.IsNullOrEmpty(reference))
             {
@@ -109,7 +112,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                 {
                     string data = "{\"name\":\"" + fqdn + "\"}";
 
-                    return base.UpdateIbxObject<host>(reference, data);
+                    return await base.UpdateIbxObject<host>(reference, data);
                 }
                 else
                 {
@@ -122,7 +125,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string SetDnsHostRecordNextAvailableIP(string reference, string Network, bool EnableDHCP = false, bool SetHostName = false, string mac = "")
+        public async Task<string> SetDnsHostRecordNextAvailableIP(string reference, string Network, bool EnableDHCP = false, bool SetHostName = false, string mac = "")
         {
             if (!String.IsNullOrEmpty(reference))
             {
@@ -135,7 +138,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
                     if (SetHostName)
                     {
-                        host Host = GetIbxObject<host>(reference);
+                        host Host = await GetIbxObject<host>(reference);
                         hostName = Host.name;
                     }
 
@@ -145,7 +148,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                         ((SetHostName) ? ",\"options\":[{\"name\":\"host-name\",\"num\":12,\"value\":\"" + hostName + "\"}]" : "") +
                         "}]}";
 
-                    return base.UpdateIbxObject<host>(reference, data);
+                    return await base.UpdateIbxObject<host>(reference, data);
                 }
                 else
                 {
@@ -158,25 +161,25 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string AddDnsHostRecordIPAddresses(string reference, string[] IPAddresses)
+        public async Task<string> AddDnsHostRecordIPAddresses(string reference, string[] ipAddresses)
         {
             if (!String.IsNullOrEmpty(reference))
             {
                 List<string> ips = new List<string>();
 
-                foreach (string ip in IPAddresses)
+                foreach (string ip in ipAddresses)
                 {
-                    string temp = String.Empty;
+                    string Temp = String.Empty;
 
-                    if (NetworkAddressTest.isIPv4WithException(ip, out temp))
+                    if (NetworkAddressTest.isIPv4WithException(ip, out Temp))
                     {
-                        ips.Add(String.Format("{\"ipv4addr\":\"{0}\"}", temp));
+                        ips.Add(String.Format("{\"ipv4addr\":\"{0}\"}", Temp));
                     }
                 }
 
-                string data = "{\"ipv4addrs+\":[" + String.Join(",", ips) + "]}";
+                string Data = "{\"ipv4addrs+\":[" + String.Join(",", ips) + "]}";
 
-                return base.UpdateIbxObject<host>(reference, data);
+                return await base.UpdateIbxObject<host>(reference, Data);
             }
             else
             {
@@ -184,7 +187,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string AddDnsHostRecordIPAddress(string reference, string ipAddress, bool EnableDHCP = false, bool SetHostName = false, string mac = "")
+        public async Task<string> AddDnsHostRecordIPAddress(string reference, string ipAddress, bool EnableDHCP = false, bool SetHostName = false, string mac = "")
         {
             IPAddress ip = IPAddress.Parse(ipAddress);
 
@@ -194,7 +197,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
                 if (SetHostName)
                 {
-                    host Host = base.GetIbxObject<host>(reference);
+                    host Host = await base.GetIbxObject<host>(reference);
                     hostName = Host.name;
                 }
 
@@ -204,7 +207,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                        ((SetHostName) ? ",\"options\":[{\"name\":\"host-name\",\"num\":12,\"value\":\"" + hostName + "\"}]" : "") +
                        "}]}";
 
-                return base.UpdateIbxObject<host>(reference, data);
+                return await base.UpdateIbxObject<host>(reference, data);
             }
             else
             {
@@ -212,7 +215,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string AddDnsHostRecordNextAvailableIPAddress(string reference, string Network, bool EnableDHCP = false, bool SetHostName = false, string mac = "")
+        public async Task<string> AddDnsHostRecordNextAvailableIPAddress(string reference, string Network, bool EnableDHCP = false, bool SetHostName = false, string mac = "")
         {
             if (!String.IsNullOrEmpty(reference))
             {
@@ -220,7 +223,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
                 if (SetHostName)
                 {
-                    host Host = base.GetIbxObject<host>(reference);
+                    host Host = await base.GetIbxObject<host>(reference);
                     hostName = Host.name;
                 }
 
@@ -230,7 +233,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                        ((SetHostName) ? ",\"options\":[{\"name\":\"host-name\",\"num\":12,\"value\":\"" + hostName + "\"}]" : "") +
                        "}]}";
 
-                return base.UpdateIbxObject<host>(reference, data);
+                return await base.UpdateIbxObject<host>(reference, data);
             }
             else
             {
@@ -238,7 +241,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public string RemoveDnsHostRecordIPAddresses(string reference, string[] IPAddresses)
+        public async Task<string> RemoveDnsHostRecordIPAddresses(string reference, string[] IPAddresses)
         {
             List<string> ips = new List<string>();
 
@@ -254,7 +257,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
             string data = "{\"ipv4addrs-\":[" + String.Join(",", ips) + "]}";
 
-            return base.UpdateIbxObject<host>(reference, data);
+            return await base.UpdateIbxObject<host>(reference, data);
         }
 
         #endregion

@@ -1,83 +1,130 @@
-﻿using BAMCIS.Infoblox.InfobloxMethods;
+﻿using BAMCIS.Infoblox.Common;
+using BAMCIS.Infoblox.InfobloxMethods;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Management.Automation;
-using System.Management.Automation.Host;
 
 namespace BAMCIS.Infoblox.PowerShell.Generic
 {
     [Cmdlet(
         VerbsCommon.Set,
         "IBXObject",
-        SupportsShouldProcess = true)]
-    public class SetIbxObjectPSCmd : BaseIbxObjectPSCmd, IDynamicParameters
+        SupportsShouldProcess = true,
+        DefaultParameterSetName = _ENTERED_SESSION_BY_ATTRIBUTE
+    )]
+    public class SetIbxObjectPSCmd : UpdateObjectPSCmd, IDynamicParameters
     {
-        private object _inputObject;
-        private InfoBloxObjectsEnum _type;
-        private bool _removeEmpty;
+        /* Parameters:
+         * Base: -GridMaster -Version -Credential -Session [Dynamic Params]
+         * InputObject: -InputObject
+         * PassThru: -PassThru
+         * Force: -Force
+         * UpdateObject: -ByAttribute -Reference -RemoveEmptyEntries
+         */
 
         #region Parameters
 
+        /// <summary>
+        /// The existing InfobloxSession to use
+        /// </summary>
         [Parameter(
             Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            ParameterSetName = "ByObject",
-            HelpMessage = "The object to be updated."
-            )]
-        public object InputObject
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_BY_OBJECT
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_BY_ATTRIBUTE
+        )]
+        [ValidateNotNull()]
+        public override InfobloxSession Session
         {
             get
             {
-                return this._inputObject;
+                return base.Session;
             }
             set
             {
-                if (value != null)
-                {
-                    Type type;
-                    if (value.GetType() == typeof(PSObject))
-                    {
-                        PSObject obj = (PSObject)value;
-                        type = obj.BaseObject.GetType();
-                        value = typeof(PSExtensionMethods).GetMethod("ConvertPSObject").MakeGenericMethod(type).Invoke(typeof(PSExtensionMethods), new object[] { obj });
-                    }
-                    else
-                    {
-                        type = value.GetType();
-                    }
-
-                    if (type.IsInfobloxType())
-                    {
-                        this._inputObject = value;
-                    }
-                    else
-                    {
-                        throw new PSArgumentException(String.Format("The input object must be a valid infoblox type, {0} was provided.", value.GetType().Name));
-                    }
-                }
-                else
-                {
-                    throw new PSArgumentNullException("The input object parameter cannot be null.");
-                }
+                base.Session = value;
             }
         }
+
+        /// <summary>
+        /// The grid master to communicate with. This will be used to build the URL string.
+        /// </summary>
         [Parameter(
-            Mandatory = false,
-            ValueFromPipelineByPropertyName = true,
-            ParameterSetName = "ByObject",
-            HelpMessage = "Indicate that empty or null values should be removed from the object before sending."
-            )]
-        public bool RemoveEmptyProperties
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_BY_ATTRIBUTE
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [ValidateNotNullOrEmpty()]
+        public override string GridMaster
         {
             get
             {
-                return this._removeEmpty;
+                return base.GridMaster;
             }
             set
             {
-                this._removeEmpty = value;
+                base.GridMaster = value;
+            }
+        }
+
+        /// <summary>
+        /// The API version to specify in the URL path. The function to build the URL string for the
+        /// query will add in the leading "v"
+        /// </summary>
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_BY_ATTRIBUTE
+        )]
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [Alias("ApiVersion")]
+        [ValidateSet("LATEST", "1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.4.1", "1.4.2",
+            "1.5", "1.6", "1.6.1", "1.7", "1.7.1", "1.7.2", "1.7.3", "1.7.4", "2.0",
+            "2.1", "2.1.1", "2.2", "2.2.1", "2.2.2", "2.3")]
+        [ValidateNotNullOrEmpty()]
+        public override string Version
+        {
+            get
+            {
+                return base.Version;
+            }
+            set
+            {
+                base.Version = value;
+            }
+        }
+
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_BY_ATTRIBUTE
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_BY_OBJECT
+        )]
+        [ValidateNotNull()]
+        [System.Management.Automation.Credential()]
+        public override PSCredential Credential
+        {
+            get
+            {
+                return base.Credential;
+            }
+            set
+            {
+                base.Credential = value;
             }
         }
 
@@ -87,21 +134,20 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         {
             base.GetDynamicParameters();
 
-            if (!this.ParameterSetName.Equals("ByObject"))
+            if (this.InputObject == null)
             {
-                RuntimeDefinedParameter param = IBXDynamicParameters.ObjectType("ByAttribute", true);
+                RuntimeDefinedParameter param = IBXDynamicParameters.ObjectType(new string[] { _GRID_BY_ATTRIBUTE, _SESSION_BY_ATTRIBUTE, _ENTERED_SESSION_BY_ATTRIBUTE }, true);
                 base.ParameterDictionary.Add(param.Name, param);
 
-                string objtype = base.GetUnboundValue("ObjectType", 0) as string;
+                string ObjectType = this.GetUnboundValue<string>("ObjectType");
 
-                if (!String.IsNullOrEmpty(objtype))
+                if (!String.IsNullOrEmpty(ObjectType))
                 {
-                    if (Enum.TryParse<InfoBloxObjectsEnum>(objtype.ToUpper(), out this._type))
+                    if (Enum.TryParse<InfoBloxObjectsEnum>(ObjectType.ToUpper(), out base.ObjectType))
                     {
-                        base.ObjectType = this._type;
-                        foreach (RuntimeDefinedParameter pa in IBXDynamicParameters.ObjectTypeProperties(base.ObjectType, "ByAttribute"))
+                        foreach (RuntimeDefinedParameter Param in IBXDynamicParameters.ObjectTypeProperties(base.ObjectType, new string[] { _GRID_BY_ATTRIBUTE, _SESSION_BY_ATTRIBUTE, _ENTERED_SESSION_BY_ATTRIBUTE }))
                         {
-                            base.ParameterDictionary.Add(pa.Name, pa);
+                            base.ParameterDictionary.Add(Param.Name, Param);
                         }
                     }
                 }
@@ -121,14 +167,24 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         {
             switch (this.ParameterSetName)
             {
-                case "ByAttribute":
-                    this.ProcessByAttribute();
-                    break;
-                case "ByObject":
-                    this.ProcessByObject();
-                    break;
+                case _GRID_BY_ATTRIBUTE:
+                case _SESSION_BY_ATTRIBUTE:
+                case _ENTERED_SESSION_BY_ATTRIBUTE:
+                    {
+                        base.ProcessByAttributeForUpdatedObject("ObjectType");
+                        break;
+                    }
+                case _GRID_BY_OBJECT:
+                case _SESSION_BY_OBJECT:
+                case _ENTERED_SESSION_BY_OBJECT:
+                    {
+                        this.ProcessByUpdatedObject(base.InputObject, this.RemoveEmptyProperties);
+                        break;
+                    }
                 default:
-                    throw new PSArgumentException(String.Format("Bad parameter set name: {0}.", this.ParameterSetName));
+                    {
+                        throw new PSArgumentException($"Bad parameter set name: {this.ParameterSetName}.");
+                    }
             }
         }
 
@@ -140,95 +196,6 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         protected override void StopProcessing()
         {
             base.StopProcessing();
-        }
-
-        #endregion
-
-        #region Helper Methods
-
-        private void ProcessByAttribute()
-        {
-            if (base.ParameterDictionary.ContainsKey("ObjectType"))
-            {
-                string val = base.ParameterDictionary["ObjectType"].Value as string;
-                if (!String.IsNullOrEmpty(val) && Enum.TryParse<InfoBloxObjectsEnum>(val.ToUpper(), out this._type))
-                {
-                    base.ObjectType = this._type;
-
-                    List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
-                    foreach (KeyValuePair<string, RuntimeDefinedParameter> obj in base.ParameterDictionary)
-                    {
-                        if (obj.Value.Value != null && !String.IsNullOrEmpty(obj.Value.Value as string))
-                        {
-                            list.Add(new KeyValuePair<string, string>(obj.Key, obj.Value.Value as string));
-                        }
-                    }
-
-                    try
-                    {
-                        base.Response = typeof(IBXCommonMethods).GetMethod("UpdateIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).Invoke(base.IBX, new object[] { list }) as string;
-                    }
-                    catch (AggregateException ae)
-                    {
-                        PSCommon.WriteExceptions(ae, this.Host);
-                        this.ThrowTerminatingError(new ErrorRecord(ae.Flatten(), ae.GetType().FullName, ErrorCategory.NotSpecified, this));
-                    }
-                    catch (Exception e)
-                    {
-                        PSCommon.WriteExceptions(e, this.Host);
-                        this.ThrowTerminatingError(new ErrorRecord(e, e.GetType().FullName, ErrorCategory.NotSpecified, this));
-                    }
-                }
-                else
-                {
-                    throw new PSArgumentException(String.Format("The object type parameter was not an allowed value, {0} was provided.", val));
-                }
-            }
-            else
-            {
-                throw new PSArgumentException("The object type parameter does not exist in the dynamic parameter dictionary.");
-            }
-        }
-
-        private void ProcessByObject()
-        {
-            bool RemoveEmpty = this._removeEmpty;
-            if (!this.MyInvocation.BoundParameters.ContainsKey("RemoveEmptyProperties"))
-            {
-                int choice = 0;
-
-                ChoiceDescription yes = new ChoiceDescription("&Remove", "Will remove empty and null values from the object during serialization.");
-                ChoiceDescription no = new ChoiceDescription("&Keep", "Will keep empty and null values and overwrite any existing values.");
-                Collection<ChoiceDescription> choices = new Collection<ChoiceDescription>() { yes, no };
-                choice = Host.UI.PromptForChoice("Update Infoblox Object", ("Do you want to remove the empty properties when sending the object?"), choices, 0);
-
-                switch (choice)
-                {
-                    default:
-                    case 0:
-                        RemoveEmpty = true;
-                        break;
-                    case 1:
-                        RemoveEmpty = false;
-                        break;
-                }
-            }
-
-            try
-            {
-                this._inputObject.GetType().GetProperty("_ref").SetValue(this._inputObject, base.Ref);
-                base.Response = base.IBX.UpdateIbxObject(this.InputObject, RemoveEmpty);
-            }
-            catch (AggregateException ae)
-            {
-                PSCommon.WriteExceptions(ae, this.Host);
-                this.ThrowTerminatingError(new ErrorRecord(ae.Flatten(), ae.GetType().FullName, ErrorCategory.NotSpecified, this));
-            }
-            catch (Exception e)
-            {
-                PSCommon.WriteExceptions(e, this.Host);
-                this.ThrowTerminatingError(new ErrorRecord(e, e.GetType().FullName, ErrorCategory.NotSpecified, this));
-            }
         }
 
         #endregion

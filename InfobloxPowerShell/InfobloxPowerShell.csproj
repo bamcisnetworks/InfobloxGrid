@@ -31,26 +31,54 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Management.Automation.6.1.7601.17515\lib\net45\System.Management.Automation.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Net.Http, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Net.Http.4.3.2\lib\net46\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Algorithms, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net461\System.Security.Cryptography.Algorithms.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Encoding, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Encoding.4.3.0\lib\net46\System.Security.Cryptography.Encoding.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Primitives.4.3.0\lib\net46\System.Security.Cryptography.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.X509Certificates, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.X509Certificates.4.3.0\lib\net461\System.Security.Cryptography.X509Certificates.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PowerShell\DNS\BaseClasses\BaseIbxDnsPassThruPSCmd.cs" />
+    <Compile Include="PowerShell\DNS\BaseClasses\BaseIbxDnsForcePSCmd.cs" />
+    <Compile Include="PowerShell\DNS\BaseClasses\BaseIbxInputObjectPSCmd.cs" />
+    <Compile Include="PowerShell\Generic\BaseClasses\InputObjectPSCmd.cs" />
+    <Compile Include="PowerShell\Generic\BaseClasses\PassThruPSCmd.cs" />
+    <Compile Include="PowerShell\Generic\BaseClasses\ForcePSCmd.cs" />
+    <Compile Include="PowerShell\Generic\BaseClasses\UpdateObjectPSCmd.cs" />
+    <Compile Include="PowerShell\Generic\EnterIbxSessionPSCmd.cs" />
+    <Compile Include="PowerShell\Generic\ExitIbxSessionPSCmd.cs" />
+    <Compile Include="PowerShell\Generic\GetIbxSessionDataPSCmd.cs" />
     <Compile Include="PSCommon.cs" />
     <Compile Include="PowerShell\DHCP\NewDhcpObjectPSCmd.cs" />
     <Compile Include="PowerShell\DHCP\SetDhcpObjectPSCmd.cs" />
     <Compile Include="PowerShell\DNS\AddIPAddressToDnsHostRecordPSCmd.cs" />
-    <Compile Include="PowerShell\DNS\BaseIbxDnsPSCmd.cs" />
+    <Compile Include="PowerShell\DNS\BaseClasses\BaseIbxDnsPSCmd.cs" />
     <Compile Include="PowerShell\DNS\DnsRecordTypeEnum.cs" />
     <Compile Include="PowerShell\DNS\NewDnsHostRecordPSCmd.cs" />
     <Compile Include="PowerShell\DNS\NewDnsRecordPSCmd.cs" />
     <Compile Include="PowerShell\DNS\RemoveIPAddressFromDnsHostRecordPSCmd.cs" />
     <Compile Include="PowerShell\DNS\SetDnsHostRecordPSCmd.cs" />
     <Compile Include="PowerShell\DNS\SetDnsRecordPSCmd.cs" />
-    <Compile Include="PowerShell\Generic\BaseIbxObjectPSCmd.cs" />
+    <Compile Include="PowerShell\Generic\BaseClasses\BaseIbxObjectPSCmd.cs" />
     <Compile Include="PowerShell\Generic\GetIbxObjectPSCmd.cs" />
     <Compile Include="PowerShell\Generic\NewIbxObjectPSCmd.cs" />
     <Compile Include="PowerShell\Generic\NewIbxSessionPSCmd.cs" />

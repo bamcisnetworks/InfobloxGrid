@@ -7,6 +7,7 @@ namespace BAMCIS.Infoblox.Common.BaseObjects
         private string _comment;
 
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string comment
         {
             get

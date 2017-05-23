@@ -2,8 +2,9 @@
 using BAMCIS.Infoblox.InfobloxMethods;
 using System;
 using System.Collections.Generic;
-using System.Management.Automation;
+using System.IO;
 using System.Linq;
+using System.Management.Automation;
 using System.Reflection;
 
 namespace BAMCIS.Infoblox.PowerShell
@@ -13,7 +14,11 @@ namespace BAMCIS.Infoblox.PowerShell
     /// </summary>
     internal static class IBXDynamicParameters
     {
-        private static readonly string _SEARCH_PARAMETER_SET = "Search";
+        private static readonly string _GRID_SEARCH = "GridSearch";
+        private static readonly string _SESSION_SEARCH = "SessionSearch";
+        private static readonly string _ENTERED_SESSION_SEARCH = "EnteredSessionSearch";
+
+        private static readonly string[] _PARAMETER_SETS = new string[] { _GRID_SEARCH, _SESSION_SEARCH, _ENTERED_SESSION_SEARCH };
 
         /// <summary>
         /// Generates a Network parameter
@@ -21,20 +26,21 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <returns></returns>
         internal static RuntimeDefinedParameter Network()
         {
-            ParameterAttribute attr = new ParameterAttribute() {
+            ParameterAttribute Attr = new ParameterAttribute()
+            {
                 Mandatory = true,
                 HelpMessage = "Specify the network the next available IP should come from, in FQDN/CIDR notation, like 192.168.0.1/24."
             };
 
-            RuntimeDefinedParameter param = new RuntimeDefinedParameter()
+            RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
                 Name = "Network",
                 ParameterType = typeof(String),
             };
 
-            param.Attributes.Add(attr);
+            Param.Attributes.Add(Attr);
 
-            return param;
+            return Param;
         }
 
         /// <summary>
@@ -43,22 +49,20 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <returns></returns>
         internal static RuntimeDefinedParameter SetHostNameInDhcp()
         {
-            ParameterAttribute attr = new ParameterAttribute()
-            {
-                Mandatory = false,
-                HelpMessage = "Set the host name through dhcp option 12."
-            };
-
-            RuntimeDefinedParameter param = new RuntimeDefinedParameter()
+            RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
                 Name = "SetHostNameInDhcp",
                 ParameterType = typeof(SwitchParameter),
                 Value = new SwitchParameter()
             };
 
-            param.Attributes.Add(attr);
+            Param.Attributes.Add(new ParameterAttribute()
+            {
+                Mandatory = false,
+                HelpMessage = "Set the host name through dhcp option 12."
+            });
 
-            return param;
+            return Param;
         }
 
         /// <summary>
@@ -66,23 +70,21 @@ namespace BAMCIS.Infoblox.PowerShell
         /// </summary>
         /// <param name="required">Specifies if this parameter is mandatory</param>
         /// <returns></returns>
-        public static RuntimeDefinedParameter MAC(bool required = false)
+        internal static RuntimeDefinedParameter MAC(bool required = false)
         {
-            ParameterAttribute attr = new ParameterAttribute()
-            {
-                Mandatory = required,
-                HelpMessage = "The MAC address of the host, used if creating a fixed address or defining a MAC as part of the host record."
-            };
-
-            RuntimeDefinedParameter param = new RuntimeDefinedParameter()
+            RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
                 Name = "MAC",
                 ParameterType = typeof(string),
             };
 
-            param.Attributes.Add(attr);
+            Param.Attributes.Add(new ParameterAttribute()
+            {
+                Mandatory = required,
+                HelpMessage = "The MAC address of the host, used if creating a fixed address or defining a MAC as part of the host record."
+            });
 
-            return param;
+            return Param;
         }
 
         /// <summary>
@@ -90,23 +92,36 @@ namespace BAMCIS.Infoblox.PowerShell
         /// </summary>
         /// <param name="required">Specifies if this parameter is mandatory</param>
         /// <returns></returns>
-        public static RuntimeDefinedParameter Credential(bool required = false)
+        internal static RuntimeDefinedParameter Credential(bool required = false, IEnumerable<string> parameterSets = null)
         {
-            ParameterAttribute attr = new ParameterAttribute()
-            {
-                Mandatory = required,
-                HelpMessage = "The credentials to use to access the Grid Master."
-            };
-
-            RuntimeDefinedParameter param = new RuntimeDefinedParameter()
+            RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
                 Name = "Credential",
                 ParameterType = typeof(PSCredential),
             };
 
-            param.Attributes.Add(attr);
+            if (parameterSets != null && parameterSets.Any())
+            {
+                foreach (string Set in parameterSets)
+                {
+                    Param.Attributes.Add(new ParameterAttribute()
+                    {
+                        Mandatory = required,
+                        HelpMessage = "The credentials to use to access the Grid Master.",
+                        ParameterSetName = Set
+                    });
+                }
+            }
+            else
+            {
+                Param.Attributes.Add(new ParameterAttribute()
+                {
+                    Mandatory = required,
+                    HelpMessage = "The credentials to use to access the Grid Master.",
+                });
+            }
 
-            return param;
+            return Param;
         }
 
         /// <summary>
@@ -114,44 +129,50 @@ namespace BAMCIS.Infoblox.PowerShell
         /// </summary>
         /// <param name="required">Specifies if this parameter is mandatory</param>
         /// <returns></returns>
-        public static RuntimeDefinedParameter ObjectType(bool required = false)
+        internal static RuntimeDefinedParameter ObjectType(bool required = false)
         {
-            return ObjectType(ParameterAttribute.AllParameterSets, required);
+            return ObjectType(new string[] { ParameterAttribute.AllParameterSets }, required);
         }
 
         /// <summary>
-        /// Returns an ObjectType parameter that applies to the specified parameter set.
+        /// Returns an ObjectType parameter that applies to the specified parameter sets, or .
         /// </summary>
-        /// <param name="parameterSetName">The parameter set this parameter set is part of</param>
+        /// <param name="parameterSets">The parameter sets this parameter is part of</param>
         /// <param name="required">Specifies if this parameter is mandatory</param>
         /// <returns></returns>
-        public static RuntimeDefinedParameter ObjectType(string parameterSetName, bool required = false)
+        internal static RuntimeDefinedParameter ObjectType(IEnumerable<string> parameterSets, bool required = false)
         {
-            if (!String.IsNullOrEmpty(parameterSetName))
+            RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
-                ParameterAttribute attr = new ParameterAttribute()
+                Name = "ObjectType",
+                ParameterType = typeof(String)
+            };
+
+            if (parameterSets != null && parameterSets.Any())
+            {
+                foreach (string Set in parameterSets)
                 {
-                    Mandatory = required,
-                    HelpMessage = "The type of object to get.",
-                    ParameterSetName = parameterSetName
-                };
-
-                RuntimeDefinedParameter param = new RuntimeDefinedParameter()
-                {
-                    Name = "ObjectType",
-                    ParameterType = typeof(String)
-                };
-
-                ValidateSetAttribute set = new ValidateSetAttribute(Enum.GetValues(typeof(InfoBloxObjectsEnum)).Cast<InfoBloxObjectsEnum>().ToList().Select(x => x.ToString()).ToArray());
-
-                param.Attributes.Add(attr);
-                param.Attributes.Add(set);
-                return param;
+                    Param.Attributes.Add(new ParameterAttribute()
+                    {
+                        Mandatory = required,
+                        HelpMessage = "The type of object to get.",
+                        ParameterSetName = Set
+                    });
+                }
             }
             else
             {
-                throw new ArgumentNullException("parameterSetName", "The parameter set name cannot be null or empty.");
+                Param.Attributes.Add(new ParameterAttribute()
+                {
+                    Mandatory = required,
+                    HelpMessage = "The type of object to get.",
+                    ParameterSetName = ParameterAttribute.AllParameterSets
+                });
             }
+
+            Param.Attributes.Add(new ValidateSetAttribute(Enum.GetValues(typeof(InfoBloxObjectsEnum)).Cast<InfoBloxObjectsEnum>().ToList().Select(x => x.ToString()).ToArray()));
+
+            return Param;
         }
 
         /// <summary>
@@ -159,25 +180,22 @@ namespace BAMCIS.Infoblox.PowerShell
         /// </summary>
         /// <param name="required">Specifies if this parameter is mandatory</param>
         /// <returns></returns>
-        public static RuntimeDefinedParameter RecordType(bool required = false)
+        internal static RuntimeDefinedParameter RecordType(bool required = false)
         {
-            ParameterAttribute attr = new ParameterAttribute()
-            {
-                Mandatory = required,
-                HelpMessage = "The type of record to create."
-            };
-
-            RuntimeDefinedParameter param = new RuntimeDefinedParameter()
+            RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
                 Name = "RecordType",
                 ParameterType = typeof(String)
             };
 
-            ValidateSetAttribute set = new ValidateSetAttribute(IBXCommonMethods.GetDnsRecordTypes().Select(x => x.ToString()).ToArray());
+            Param.Attributes.Add(new ParameterAttribute()
+            {
+                Mandatory = required,
+                HelpMessage = "The type of record to create."
+            });
 
-            param.Attributes.Add(attr);
-            param.Attributes.Add(set);
-            return param;
+            Param.Attributes.Add(new ValidateSetAttribute(IBXCommonMethods.GetDnsRecordTypes().Select(x => x.ToString()).ToArray()));
+            return Param;
         }
 
         /// <summary>
@@ -185,25 +203,23 @@ namespace BAMCIS.Infoblox.PowerShell
         /// </summary>
         /// <param name="required">Specifies if this parameter is mandatory</param>
         /// <returns></returns>
-        public static RuntimeDefinedParameter DhcpType(bool required = false)
+        internal static RuntimeDefinedParameter DhcpType(bool required = false)
         {
-            ParameterAttribute attr = new ParameterAttribute()
-            {
-                Mandatory = required,
-                HelpMessage = "The type of dhcp object to create."
-            };
-
-            RuntimeDefinedParameter param = new RuntimeDefinedParameter()
+            RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
                 Name = "DhcpType",
                 ParameterType = typeof(String)
             };
 
-            ValidateSetAttribute set = new ValidateSetAttribute(IBXCommonMethods.GetDhcpRecordTypes().Select(x => x.ToString()).ToArray());
+            Param.Attributes.Add(new ParameterAttribute()
+            {
+                Mandatory = required,
+                HelpMessage = "The type of dhcp object to create."
+            });
 
-            param.Attributes.Add(attr);
-            param.Attributes.Add(set);
-            return param;
+            Param.Attributes.Add(new ValidateSetAttribute(IBXCommonMethods.GetDhcpRecordTypes().Select(x => x.ToString()).ToArray()));
+
+            return Param;
         }
 
         /// <summary>
@@ -213,23 +229,21 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <returns></returns>
         public static RuntimeDefinedParameter ZoneType(bool required = false)
         {
-            ParameterAttribute attr = new ParameterAttribute()
-            {
-                Mandatory = required,
-                HelpMessage = "The type of zone object to create."
-            };
-
-            RuntimeDefinedParameter param = new RuntimeDefinedParameter()
+            RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
                 Name = "ZoneType",
                 ParameterType = typeof(String)
             };
 
-            ValidateSetAttribute set = new ValidateSetAttribute(IBXCommonMethods.GetZoneTypes().Select(x => x.ToString()).ToArray());
+            Param.Attributes.Add(new ParameterAttribute()
+            {
+                Mandatory = required,
+                HelpMessage = "The type of zone object to create."
+            });
 
-            param.Attributes.Add(attr);
-            param.Attributes.Add(set);
-            return param;
+            Param.Attributes.Add(new ValidateSetAttribute(IBXCommonMethods.GetZoneTypes().Select(x => x.ToString()).ToArray()));
+
+            return Param;
         }
 
         /// <summary>
@@ -239,42 +253,49 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <param name="parameterSetName">The name of the parameter set these parameters will be part of</param>
         /// <param name="required">Specifies if these parameters are mandatory</param>
         /// <returns></returns>
-        public static IEnumerable<RuntimeDefinedParameter> ObjectTypeProperties(InfoBloxObjectsEnum objectType, string parameterSetName, bool required = false)
+        public static IEnumerable<RuntimeDefinedParameter> ObjectTypeProperties(InfoBloxObjectsEnum objectType, IEnumerable<string> parameterSets)
         {
-            PropertyInfo[] info = objectType.GetObjectType().GetTypeInfo().GetProperties().Where(x => x.GetCustomAttribute<ReadOnlyAttribute>() == null && x.Name != "_ref").ToArray();
+            PropertyInfo[] PropInfo = objectType.GetObjectType().GetTypeInfo().GetProperties().Where(x => x.GetCustomAttribute<ReadOnlyAttribute>() == null && x.Name != "_ref").ToArray();
 
-            List<RuntimeDefinedParameter> list = new List<RuntimeDefinedParameter>();
+            List<RuntimeDefinedParameter> ParamList = new List<RuntimeDefinedParameter>();
 
-            foreach (PropertyInfo prop in info)
+            foreach (PropertyInfo Property in PropInfo)
             {
-                ParameterAttribute attr = new ParameterAttribute()
+                RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
                 {
-                    Mandatory = required,
-                    HelpMessage = $"The {prop.Name} property of the object.",
-                    ParameterSetName = parameterSetName
+                    Name = Char.ToUpper(Property.Name.First()) + Property.Name.Substring(1),
+                    ParameterType = Property.PropertyType
                 };
 
-                if (prop.GetCustomAttribute<RequiredAttribute>() != null)
+                bool Mandatory = Property.GetCustomAttribute<RequiredAttribute>() != null;
+
+                if (parameterSets != null && parameterSets.Any())
                 {
-                    attr.Mandatory = true;
+                    foreach (string Set in parameterSets)
+                    {
+                        ParameterAttribute attr = new ParameterAttribute()
+                        {
+                            Mandatory = Mandatory,
+                            HelpMessage = $"The {Property.Name} property of the object.",
+                            ParameterSetName = Set
+                        };
+
+                        Param.Attributes.Add(attr);
+                    }
                 }
                 else
                 {
-                    attr.Mandatory = false;
+                    Param.Attributes.Add(new ParameterAttribute()
+                    {
+                        Mandatory = Mandatory,
+                        HelpMessage = $"The {Property.Name} property of the object."
+                    });
                 }
 
-                RuntimeDefinedParameter param = new RuntimeDefinedParameter()
-                {
-                    Name = Char.ToUpper(prop.Name.First()) + prop.Name.Substring(1),
-                    ParameterType = prop.PropertyType
-                };
-
-                param.Attributes.Add(attr);
-
-                list.Add(param);
+                ParamList.Add(Param);
             }
 
-            return list;
+            return ParamList;
         }
 
         /// <summary>
@@ -284,9 +305,9 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <param name="objectType">The type of object to get the properties of</param>
         /// <param name="required">Specifies if these parameters are mandatory</param>
         /// <returns></returns>
-        public static IEnumerable<RuntimeDefinedParameter> ObjectTypeProperties(InfoBloxObjectsEnum ObjectType, bool required = false)
+        public static IEnumerable<RuntimeDefinedParameter> ObjectTypeProperties(InfoBloxObjectsEnum ObjectType)
         {
-            return ObjectTypeProperties(ObjectType, ParameterAttribute.AllParameterSets, required);
+            return ObjectTypeProperties(ObjectType, new string[] { ParameterAttribute.AllParameterSets });
         }
 
         /// <summary>
@@ -300,25 +321,25 @@ namespace BAMCIS.Infoblox.PowerShell
         {
             //*** Build the list of properties that can be searched for an object
 
-            ParameterAttribute attr = new ParameterAttribute()
-            {
-                ParameterSetName = _SEARCH_PARAMETER_SET,
-                Mandatory = required,
-                HelpMessage = "Select the field to search on."
-            };
-
-            RuntimeDefinedParameter param = new RuntimeDefinedParameter()
+            RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
                 Name = "SearchField",
                 ParameterType = typeof(String)
             };
 
-            ValidateSetAttribute set = new ValidateSetAttribute(((IEnumerable<string>)typeof(SearchableAttribute).GetMethod("GetSearchableProperties").MakeGenericMethod(ibxObject.GetObjectType()).Invoke(typeof(SearchableAttribute), null)).ToArray());
+            foreach (string Set in _PARAMETER_SETS)
+            {
+                Param.Attributes.Add(new ParameterAttribute()
+                {
+                    ParameterSetName = Set,
+                    Mandatory = required,
+                    HelpMessage = "Select the field to search on."
+                });
+            }
 
-            param.Attributes.Add(attr);
-            param.Attributes.Add(set);
+            Param.Attributes.Add(new ValidateSetAttribute(((IEnumerable<string>)typeof(SearchableAttribute).GetMethod("GetSearchableProperties").MakeGenericMethod(ibxObject.GetObjectType()).Invoke(typeof(SearchableAttribute), null)).ToArray()));
 
-            return param;
+            return Param;
         }
 
         /// <summary>
@@ -330,40 +351,40 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <returns></returns>
         public static RuntimeDefinedParameter SearchType(Type objectType, string searchField, bool required = false)
         {
-            ParameterAttribute attr = new ParameterAttribute()
-            {
-                ParameterSetName = _SEARCH_PARAMETER_SET,
-                Mandatory = required,
-                HelpMessage = "Select the type of search you want to perform."
-            };   
-
-            RuntimeDefinedParameter param = new RuntimeDefinedParameter()
+            RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
                 Name = "SearchType",
                 ParameterType = typeof(String)
             };
 
-            SearchableAttribute search = objectType.GetProperty(searchField).GetCustomAttribute<SearchableAttribute>();
-
-            List<string> searchesAllowed = new List<string>();
-
-            foreach (PropertyInfo prop in search.GetType().GetProperties())
+            foreach (string Set in _PARAMETER_SETS)
             {
-                if (prop.PropertyType.Equals(typeof(bool)))
+                Param.Attributes.Add(new ParameterAttribute()
                 {
-                    if ((bool)prop.GetValue(search) == true)
+                    ParameterSetName = Set,
+                    Mandatory = required,
+                    HelpMessage = "Select the type of search you want to perform."
+                });
+            }
+
+            SearchableAttribute Search = objectType.GetProperty(searchField).GetCustomAttribute<SearchableAttribute>();
+
+            List<string> SearchesAllowed = new List<string>();
+
+            foreach (PropertyInfo Prop in Search.GetType().GetProperties())
+            {
+                if (Prop.PropertyType.Equals(typeof(bool)))
+                {
+                    if ((bool)Prop.GetValue(Search) == true)
                     {
-                        searchesAllowed.Add(prop.Name);
+                        SearchesAllowed.Add(Prop.Name);
                     }
                 }
             }
 
-            ValidateSetAttribute set = new ValidateSetAttribute(searchesAllowed.ToArray());
+            Param.Attributes.Add(new ValidateSetAttribute(SearchesAllowed.ToArray()));
 
-            param.Attributes.Add(attr);
-            param.Attributes.Add(set);
-
-            return param;
+            return Param;
         }
     }
 }

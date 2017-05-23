@@ -1,6 +1,7 @@
 ﻿using BAMCIS.Infoblox.Common;
 using BAMCIS.Infoblox.InfobloxMethods;
 using System;
+using System.IO;
 using System.Management.Automation;
 
 namespace BAMCIS.Infoblox.PowerShell.Generic
@@ -8,58 +9,179 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
     [Cmdlet(
         VerbsCommon.Get,
         "IBXObject",
-        SupportsShouldProcess = false
-        )
-    ]
+        SupportsShouldProcess = false,
+        DefaultParameterSetName = _ENTERED_SESSION_SEARCH
+    )]
     public class GetIBXObjectCommand : BaseIbxObjectPSCmd, IDynamicParameters
     {
-        private string _searchField;
+        private string _SearchField;
         private SearchType _searchType = SearchType.EQUALITY;
-        private string _searchValue;
-        private InfoBloxObjectsEnum _type;
+        private string _SearchValue;
 
         #region Parameters
 
+        #region Parameters
+
+        /// <summary>
+        /// The existing InfobloxSession to use
+        /// </summary>
         [Parameter(
-            ParameterSetName = "Reference",
             Mandatory = true,
-            HelpMessage = "The object reference string.")
-        ]
-        [Alias("Ref")]
-        public string Reference
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_REFERENCE
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "An established session object to use to connect to the grid master.",
+            ParameterSetName = _SESSION_SEARCH
+        )]
+        [ValidateNotNull()]
+        public override InfobloxSession Session
         {
             get
             {
-                return base.Ref;
+                return base.Session;
             }
             set
             {
-                if (!String.IsNullOrEmpty(value))
-                {
-                    base.Ref = value;
-                }
-                else
-                {
-                    throw new PSArgumentNullException("Reference", "The host record reference cannot be null or empty.");
-                }
+                base.Session = value;
+            }
+        }
+
+        /// <summary>
+        /// The grid master to communicate with. This will be used to build the URL string.
+        /// </summary>
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_SEARCH
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The IP address or FQDN of the grid master interface.",
+            ParameterSetName = _GRID_REFERENCE
+        )]
+        [ValidateNotNullOrEmpty()]
+        public override string GridMaster
+        {
+            get
+            {
+                return base.GridMaster;
+            }
+            set
+            {
+                base.GridMaster = value;
+            }
+        }
+
+        /// <summary>
+        /// The API version to specify in the URL path. The function to build the URL string for the
+        /// query will add in the leading "v"
+        /// </summary>
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_SEARCH
+        )]
+        [Parameter(
+            HelpMessage = "The version of the Infoblox WAPI, will default to LATEST.",
+            ParameterSetName = _GRID_REFERENCE
+        )]
+        [Alias("ApiVersion")]
+        [ValidateSet("LATEST", "1.0", "1.1", "1.2", "1.2.1", "1.3", "1.4", "1.4.1", "1.4.2",
+            "1.5", "1.6", "1.6.1", "1.7", "1.7.1", "1.7.2", "1.7.3", "1.7.4", "2.0",
+            "2.1", "2.1.1", "2.2", "2.2.1", "2.2.2", "2.3")]
+        [ValidateNotNullOrEmpty()]
+        public override string Version
+        {
+            get
+            {
+                return base.Version;
+            }
+            set
+            {
+                base.Version = value;
             }
         }
 
         [Parameter(
-            ParameterSetName = "Search",
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_SEARCH
+        )]
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "The credentials to use to access the Grid Master.",
+            ParameterSetName = _GRID_REFERENCE
+        )]
+        [ValidateNotNull()]
+        [System.Management.Automation.Credential()]
+        public override PSCredential Credential
+        {
+            get
+            {
+                return base.Credential;
+            }
+            set
+            {
+                base.Credential = value;
+            }
+        }
+
+        #endregion
+
+        [Parameter(
+            ParameterSetName = _GRID_REFERENCE,
+            Mandatory = true,
+            HelpMessage = "The object reference string."
+        )]
+        [Parameter(
+            ParameterSetName = _SESSION_REFERENCE,
+            Mandatory = true,
+            HelpMessage = "The object reference string."
+        )]
+        [Parameter(
+            ParameterSetName = _ENTERED_SESSION_REFERENCE,
+            Mandatory = true,
+            HelpMessage = "The object reference string."
+        )]
+        [Alias("Ref")]
+        [ValidateNotNullOrEmpty()]
+        public string Reference
+        {
+            get
+            {
+                return base._Ref;
+            }
+            set
+            {
+                base._Ref = value;
+            }
+        }
+
+        [Parameter(
+            ParameterSetName = _GRID_SEARCH,
             Mandatory = true,
             HelpMessage = "The value of the object field being searched."
-            )
-        ]
+        )]
+        [Parameter(
+            ParameterSetName = _SESSION_SEARCH,
+            Mandatory = true,
+            HelpMessage = "The value of the object field being searched."
+        )]
+        [Parameter(
+            ParameterSetName = _ENTERED_SESSION_SEARCH,
+            Mandatory = true,
+            HelpMessage = "The value of the object field being searched."
+        )]
         public string SearchValue
         {
             get
             {
-                return this._searchValue;
+                return this._SearchValue;
             }
             set
             {
-                this._searchValue = value;
+                this._SearchValue = value;
             }
         }
 
@@ -69,32 +191,31 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         {
             base.GetDynamicParameters();
 
-            if (this.ParameterSetName == "Search")
+            if (String.IsNullOrEmpty(this.Reference))
             {
-                string objtype = base.GetUnboundValue("ObjectType", 0) as string;
+                RuntimeDefinedParameter Parameter = IBXDynamicParameters.ObjectType(true);
 
-                RuntimeDefinedParameter param = IBXDynamicParameters.ObjectType(true);
+                base.ParameterDictionary.Add(Parameter.Name, Parameter);
 
-                base.ParameterDictionary.Add(param.Name, param);
+                string ObjectType = this.GetUnboundValue<string>("ObjectType");
 
-                if (!String.IsNullOrEmpty(objtype))
+                if (!String.IsNullOrEmpty(ObjectType))
                 {
-                    if (Enum.TryParse<InfoBloxObjectsEnum>(objtype, out this._type))
+                    if (Enum.TryParse<InfoBloxObjectsEnum>(ObjectType, out base.ObjectType))
                     {
-                        base.ObjectType = this._type;
-                        RuntimeDefinedParameter searchFields = IBXDynamicParameters.SearchField(base.ObjectType, true);
-                        base.ParameterDictionary.Add(searchFields.Name, searchFields);
+                        RuntimeDefinedParameter SearchFields = IBXDynamicParameters.SearchField(base.ObjectType, true);
+                        base.ParameterDictionary.Add(SearchFields.Name, SearchFields);
                     }
                 }
 
-                string search = base.GetUnboundValue("SearchField", 0) as string;
+                string SearchField = this.GetUnboundValue<string>("SearchField");
 
-                if (!String.IsNullOrEmpty(search))
+                if (!String.IsNullOrEmpty(SearchField))
                 {
                     //*** After the user has picked a search field, return the valid types of searches than can be performed
 
-                    RuntimeDefinedParameter searchType = IBXDynamicParameters.SearchType(base.ObjectType.GetObjectType(), search, true);
-                    base.ParameterDictionary.Add(searchType.Name, searchType);
+                    RuntimeDefinedParameter SearchType = IBXDynamicParameters.SearchType(base.ObjectType.GetObjectType(), SearchField, true);
+                    base.ParameterDictionary.Add(SearchType.Name, SearchType);
                 }
             }
 
@@ -109,16 +230,17 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
         protected override void ProcessRecord()
         {
-            switch (this.ParameterSetName)
+            if (this.ParameterSetName.EndsWith(_REFERENCE))
             {
-                case "Reference":
-                    this.ProcessByReference();
-                    break;
-                case "Search":
-                    this.Search();
-                    break;
-                default:
-                    throw new ArgumentException("Bad ParameterSet Name");
+                this.ProcessByReference();
+            }
+            else if (this.ParameterSetName.EndsWith(_SEARCH))
+            {
+                this.Search();
+            }
+            else
+            {
+                throw new PSArgumentException($"Bad ParameterSet Name: {this.ParameterSetName}");
             }
 
             if (base.ObjectResponse != null)
@@ -147,15 +269,20 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
         private void ProcessByReference()
         {
-            string[] temp = base.Ref.Split('/');
-            if (temp.Length > 0)
+            string[] Temp = base._Ref.Split('/');
+            if (Temp.Length > 0)
             {
                 try
                 {
-                    base.ObjectType = IBXCommonMethods.GetInfobloxObjectEnumFromName(temp[0]);
+                    base.ObjectType = IBXCommonMethods.GetInfobloxObjectEnumFromName(Temp[0]);
+
+                    StringWriter SWriter = new StringWriter();
+                    TextWriter OriginalOut = Console.Out;
+                    Console.SetOut(SWriter);
+
                     try
                     {
-                        base.ObjectResponse = typeof(IBXCommonMethods).GetMethod("GetIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).Invoke(base.IBX, new object[] { base.Ref });
+                        base.ObjectResponse = typeof(IBXCommonMethods).GetMethod("GetIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).InvokeGenericAsync(base.IBX, new object[] { base._Ref }).Result;
                     }
                     catch (AggregateException ae)
                     {
@@ -166,6 +293,11 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                     {
                         PSCommon.WriteExceptions(e, this.Host);
                         this.ThrowTerminatingError(new ErrorRecord(e, e.GetType().FullName, ErrorCategory.NotSpecified, this));
+                    }
+                    finally
+                    {
+                        WriteVerbose(SWriter.ToString());
+                        Console.SetOut(OriginalOut);
                     }
                 }
                 catch (Exception e)
@@ -185,21 +317,21 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             if (base.ParameterDictionary.ContainsKey("ObjectType"))
             {
                 string objectType = base.ParameterDictionary["ObjectType"].Value as string;
+
                 if (!String.IsNullOrEmpty(objectType))
                 {
-                    if (!Enum.TryParse<InfoBloxObjectsEnum>(objectType.ToUpper(), out this._type))
+                    if (!Enum.TryParse<InfoBloxObjectsEnum>(objectType.ToUpper(), out base.ObjectType))
                     {
                         throw new PSArgumentException("Object type parameter was not an allowed value.");
                     }
                     else
                     {
-                        base.ObjectType = this._type;
-
-                        this._searchField = base.ParameterDictionary["SearchField"].Value.ToString();
+                        this._SearchField = base.ParameterDictionary["SearchField"].Value.ToString();
 
                         if (base.ParameterDictionary.ContainsKey("SearchType"))
                         {
                             string searchType = base.ParameterDictionary["SearchType"].Value as string;
+
                             if (!String.IsNullOrEmpty(searchType))
                             {
                                 if (!Enum.TryParse<SearchType>(searchType.ToUpper(), out this._searchType))
@@ -228,9 +360,13 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                 throw new PSArgumentNullException("ObjectType", "The object type parameter is required for a search.");
             }
 
+            StringWriter SWriter = new StringWriter();
+            TextWriter OriginalOut = Console.Out;
+            Console.SetOut(SWriter);
+
             try
             {
-                base.ObjectResponse = typeof(IBXCommonMethods).GetMethod("SearchIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).Invoke(base.IBX, new object[] { this._searchType, this._searchField, this._searchValue });
+                base.ObjectResponse = typeof(IBXCommonMethods).GetMethod("SearchIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).InvokeGenericAsync(base.IBX, new object[] { this._searchType, this._SearchField, this._SearchValue }).Result;
             }
             catch (AggregateException ae)
             {
@@ -241,6 +377,11 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             {
                 PSCommon.WriteExceptions(e, this.Host);
                 this.ThrowTerminatingError(new ErrorRecord(e, e.GetType().FullName, ErrorCategory.NotSpecified, this));
+            }
+            finally
+            {
+                WriteVerbose(SWriter.ToString());
+                Console.SetOut(OriginalOut);
             }
         }
 
