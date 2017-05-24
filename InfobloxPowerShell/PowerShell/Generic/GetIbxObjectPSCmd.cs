@@ -16,9 +16,6 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
     {
         private string _SearchField;
         private SearchType _searchType = SearchType.EQUALITY;
-        private string _SearchValue;
-
-        #region Parameters
 
         #region Parameters
 
@@ -127,8 +124,6 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             }
         }
 
-        #endregion
-
         [Parameter(
             ParameterSetName = _GRID_REFERENCE,
             Mandatory = true,
@@ -173,17 +168,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             Mandatory = true,
             HelpMessage = "The value of the object field being searched."
         )]
-        public string SearchValue
-        {
-            get
-            {
-                return this._SearchValue;
-            }
-            set
-            {
-                this._SearchValue = value;
-            }
-        }
+        public string SearchValue { get; set; }
 
         #endregion
 
@@ -366,7 +351,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
             try
             {
-                base.ObjectResponse = typeof(IBXCommonMethods).GetMethod("SearchIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).InvokeGenericAsync(base.IBX, new object[] { this._searchType, this._SearchField, this._SearchValue }).Result;
+                base.ObjectResponse = typeof(IBXCommonMethods).GetMethod("SearchIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).InvokeGenericAsync(base.IBX, new object[] { this._searchType, this._SearchField, this.SearchValue }).Result;
             }
             catch (AggregateException ae)
             {

@@ -77,6 +77,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         protected PSCredential _Credential = PSCredential.Empty;
         protected string _Version = "LATEST";
         protected InfobloxSession _Session = null;
+        protected UInt32 _Timeout = 100;
 
         #region Parameters
 
@@ -137,6 +138,21 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             }
         }
 
+        [Parameter(
+            HelpMessage = "The timeout in seconds to use for the HttpClient. This defaults to 100."    
+        )]
+        public UInt32 Timeout
+        {
+            get
+            {
+                return this._Timeout;
+            }
+            set
+            {
+                this._Timeout = value;
+            }
+        }
+
         #endregion
 
         public object ObjectResponse
@@ -144,7 +160,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             get; protected set;
         }
 
-        public virtual IBXCommonMethods IBX
+        protected IBXCommonMethods IBX
         {
             get
             {
@@ -196,7 +212,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                 {
                     if (this.Version.Equals("LATEST"))
                     {
-                        using (HttpClient Client = CommandHelpers.BuildHttpClient(this.GridMaster, "1.0", this.Credential.UserName, this.Credential.Password).Result)
+                        using (HttpClient Client = CommandHelpers.BuildHttpClient(this.GridMaster, "1.0", this.Credential.UserName, this.Credential.Password, TimeSpan.FromSeconds(Timeout)).Result)
                         {
                             WriteVerbose("Getting supported versions.");
 
@@ -229,15 +245,15 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                         }
                     }
 
-                    this._IBX = new IBXCommonMethods(this.GridMaster, this.Version, this.Credential.UserName, this.Credential.Password);
+                    this._IBX = new IBXCommonMethods(this.GridMaster, this.Version, this.Credential.UserName, this.Credential.Password, TimeSpan.FromSeconds(Timeout));
                 }
                 else if (this.ParameterSetName.StartsWith(_SESSION))
                 {
-                    this._IBX = new IBXCommonMethods(this.Session);
+                    this._IBX = new IBXCommonMethods(this.Session, TimeSpan.FromSeconds(Timeout));
                 }
                 else if (this.ParameterSetName.StartsWith(_ENTERED_SESSION))
                 {
-                    this._IBX = new IBXCommonMethods();
+                    this._IBX = new IBXCommonMethods(TimeSpan.FromSeconds(Timeout));
                 }
                 else
                 {

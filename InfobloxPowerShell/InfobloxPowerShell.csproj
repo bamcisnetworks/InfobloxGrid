@@ -67,6 +67,7 @@
     <Compile Include="PowerShell\Generic\EnterIbxSessionPSCmd.cs" />
     <Compile Include="PowerShell\Generic\ExitIbxSessionPSCmd.cs" />
     <Compile Include="PowerShell\Generic\GetIbxSessionDataPSCmd.cs" />
+    <Compile Include="PowerShell\Grid\GetIbxGridPSCmd.cs" />
     <Compile Include="PSCommon.cs" />
     <Compile Include="PowerShell\DHCP\NewDhcpObjectPSCmd.cs" />
     <Compile Include="PowerShell\DHCP\SetDhcpObjectPSCmd.cs" />

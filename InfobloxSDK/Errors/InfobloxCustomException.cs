@@ -1,10 +1,4 @@
-﻿#if (NETSTANDARD2_0 || NETSTANDARD1_6 || NETSTANDARD1_5 || NETSTANDARD1_4 || NETSTANDARD1_3 || NETSTANDARD1_2 || NETSTANDARD1_1 || NETSTANDARD1_0)
-#define NETSTANDARD 
-#else
-#define NET
-#endif
-
-using System;
+﻿using System;
 using System.Net.Http;
 using Newtonsoft.Json;
 
@@ -22,14 +16,36 @@ namespace BAMCIS.Infoblox.Errors
 
         public InfobloxCustomException(HttpResponseMessage response)
         {
-            InfobloxError error = JsonConvert.DeserializeObject<InfobloxError>(response.Content.ReadAsStringAsync().Result);
+            string Temp = response.Content.ReadAsStringAsync().Result;
 
-            this._message = error.text;
-            this.Error = error.Error.Trim('\r').Trim('\n').Trim('\r');
-            this.Text = error.text;
-            this.HttpCode = (int)response.StatusCode;
-            this.HttpStatusCode = response.StatusCode.ToString();
-            this.HttpMessage = response.ReasonPhrase;
+            try
+            {
+                InfobloxError error = JsonConvert.DeserializeObject<InfobloxError>(Temp);
+
+                this._message = error.text;
+                this.Error = error.Error.Trim('\r').Trim('\n').Trim('\r');
+                this.Text = error.text;
+                this.HttpCode = (int)response.StatusCode;
+                this.HttpStatusCode = response.StatusCode.ToString();
+                this.HttpMessage = response.ReasonPhrase;
+            }
+            catch (Exception)
+            {
+                this._message = Temp;
+                this.Text = Temp;
+                this.HttpCode = (int)response.StatusCode;
+                this.HttpStatusCode = response.StatusCode.ToString();
+                this.HttpMessage = response.ReasonPhrase;
+            }
+        }
+
+        public InfobloxCustomException(Exception e)
+        {
+            this._message = e.Message;
+            this.Text = e.Message;
+            this.HttpMessage = e.GetType().FullName;
+            this.HttpCode = e.HResult;
+            this.HttpStatusCode = e.Source;
         }
 
         public InfobloxCustomException(string Message)

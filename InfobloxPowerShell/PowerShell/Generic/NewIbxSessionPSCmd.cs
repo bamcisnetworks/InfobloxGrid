@@ -125,26 +125,13 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
             using (HttpClient Client = CommandHelpers.BuildHttpClient(this.GridMaster, this.Version, this.Credential.UserName, this.Credential.Password).Result)
             {
-                IEnumerable<string> Cookies;
-
                 HttpResponseMessage Response = Client.GetAsync("grid").Result;
-                Response.Headers.TryGetValues("Set-Cookie", out Cookies);
 
-                if (Cookies != null && Cookies.Count() > 0)
+                Cookie Cookie = CommandHelpers.GetResponseCookie(Response);
+
+                if (Cookie != null && !Cookie.Expired)
                 {
-                    string[] CookieParts = Cookies.FirstOrDefault(x => x.StartsWith("ibapauth")).Split(';');
-
-                    if (CookieParts.Any())
-                    {
-                        WriteVerbose("Found an ibapauth cookie.");
-                        if (!String.IsNullOrEmpty(CookieParts[0]))
-                        {
-                            Session.Cookie = new Cookie("ibapauth", CookieParts[0].Replace("ibapauth=", ""), "", Response.RequestMessage.RequestUri.Host)
-                            {
-                                Secure = true
-                            };
-                        }
-                    }
+                    Session.Cookie = Cookie;
                 }
             }
 

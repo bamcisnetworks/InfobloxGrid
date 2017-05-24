@@ -10,16 +10,14 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Http;
 
 namespace BAMCIS.Infoblox.Common
 {
@@ -27,11 +25,10 @@ namespace BAMCIS.Infoblox.Common
     {
         private static readonly char[] _charsToTrim = { '[', ']' };
 
-        public static async Task<HttpClient> BuildHttpClient(string gridMaster, string apiVersion, string username, SecureString password)
+        public static async Task<HttpClient> BuildHttpClient(string gridMaster, string apiVersion, string username, SecureString password, TimeSpan? timeout = null)
         {
             if (await CommandHelpers.CheckConnection(gridMaster))
             {
-                HttpClient Client;
                 HttpClientHandler Handler = new HttpClientHandler();
                 Handler.ServerCertificateCustomValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
@@ -40,12 +37,16 @@ namespace BAMCIS.Infoblox.Common
                     apiVersion = $"v{apiVersion}";
                 }
 
-                Client = new HttpClient(Handler)
+                HttpClient Client = new HttpClient(Handler)
                 {
-                    BaseAddress = new Uri("https://" + gridMaster + "/wapi/" + apiVersion + "/"),
-                    Timeout = TimeSpan.FromSeconds(30),
-
+                    BaseAddress = new Uri("https://" + gridMaster + "/wapi/" + apiVersion + "/")
                 };
+
+                //The actual default is 100 seconds
+                if (timeout != null)
+                {
+                    Client.Timeout = (TimeSpan)timeout;
+                }
 
                 Client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
                     Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + SecureStringHelper.ToReadableString(password))));
@@ -58,15 +59,12 @@ namespace BAMCIS.Infoblox.Common
             }
         }
 
-        public static async Task<HttpClient> BuildHttpClient(string gridMaster, string apiVersion)
+        public static async Task<HttpClient> BuildHttpClient(string gridMaster, string apiVersion, TimeSpan? timeout = null)
         {
             if (await CommandHelpers.CheckConnection(gridMaster))
             {
-                HttpClient Client;
-
                 if (InfobloxSessionData.UseSessionData)
                 {
- 
                     if (InfobloxSessionData.Cookie != null && !InfobloxSessionData.Cookie.Expired)
                     {
                         HttpClientHandler Handler = new HttpClientHandler() { CookieContainer = new CookieContainer() };
@@ -82,11 +80,16 @@ namespace BAMCIS.Infoblox.Common
 
                         Handler.ServerCertificateCustomValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
-                        Client = new HttpClient(Handler)
+                        HttpClient Client = new HttpClient(Handler)
                         {
-                            BaseAddress = Address,
-                            Timeout = TimeSpan.FromSeconds(30)
+                            BaseAddress = Address
                         };
+
+                        //The actual default is 100 seconds
+                        if (timeout != null)
+                        {
+                            Client.Timeout = (TimeSpan)timeout;
+                        }
 
                         return Client;
                     }
@@ -106,12 +109,10 @@ namespace BAMCIS.Infoblox.Common
             }
         }
 
-        public static async Task<HttpClient> BuildHttpClient(string gridMaster, string apiVersion, Cookie cookie)
+        public static async Task<HttpClient> BuildHttpClient(string gridMaster, string apiVersion, Cookie cookie, TimeSpan? timeout = null)
         {
             if (await CommandHelpers.CheckConnection(gridMaster))
             {
-                HttpClient Client;
-
                 if (cookie != null)
                 {
                     if (!cookie.Expired)
@@ -129,11 +130,16 @@ namespace BAMCIS.Infoblox.Common
 
                         Handler.ServerCertificateCustomValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
-                        Client = new HttpClient(Handler)
+                        HttpClient Client = new HttpClient(Handler)
                         {
-                            BaseAddress = Address,
-                            Timeout = TimeSpan.FromSeconds(30)
+                            BaseAddress = Address
                         };
+
+                        //The actual default timeout is 100 seconds
+                        if (timeout != null)
+                        {
+                            Client.Timeout = (TimeSpan)timeout;
+                        }
 
                         return Client;
                     }
@@ -236,10 +242,10 @@ namespace BAMCIS.Infoblox.Common
 
         internal static string ParsePostPutDeleteResponse(HttpResponseMessage response)
         {
-            CommandHelpers.ProcessResponseCookies(response);
-
             if (response.IsSuccessStatusCode)
             {
+                CommandHelpers.UpdateSessionDataCookieFromResponse(response);
+
                 return response.Content.ReadAsStringAsync().Result.Replace("\"", "");
             }
             else
@@ -250,10 +256,10 @@ namespace BAMCIS.Infoblox.Common
 
         internal static T ParseGetResponse<T>(HttpResponseMessage response)
         {
-            CommandHelpers.ProcessResponseCookies(response);
-
             if (response.IsSuccessStatusCode)
             {
+                CommandHelpers.UpdateSessionDataCookieFromResponse(response);
+
                 return JsonConvert.DeserializeObject<T>(response.Content.ReadAsStringAsync().Result.Trim(_charsToTrim));
             }
             else
@@ -264,10 +270,10 @@ namespace BAMCIS.Infoblox.Common
 
         internal static object ParseGetResponse(HttpResponseMessage response, Type type)
         {
-            CommandHelpers.ProcessResponseCookies(response);
-
             if (response.IsSuccessStatusCode)
             {
+                CommandHelpers.UpdateSessionDataCookieFromResponse(response);
+
                 return JsonConvert.DeserializeObject(response.Content.ReadAsStringAsync().Result.Trim(_charsToTrim), type);
             }
             else
@@ -276,104 +282,97 @@ namespace BAMCIS.Infoblox.Common
             }
         }
 
-        private static void ProcessResponseCookies(HttpResponseMessage response)
+        public static Cookie GetResponseCookie(HttpResponseMessage response)
         {
-            if (!CommandHelpers.IsRequestCookieStillValid(response.RequestMessage))
+            if (response.IsSuccessStatusCode)
             {
-                CommandHelpers.SetCookieFromResponse(response);
-            }
-        }
+                IEnumerable<string> Cookies;
 
-        private static string GetCookiePath()
-        {
-#if NETSTANDARD
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Microsoft", "Windows", "INetCookies", "infoblox.txt");
-            }
-            else
-            {
-                return "/tmp/cookies/infoblox.txt";
-            }
-#else
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft", "Windows", "INetCookies", "infoblox.txt");
-#endif
-        }
+                /*
+                 * Cookie string
+                 * ibapauth="group=admin-group,ctime=1495590270,ip=192.168.1.101,auth=LOCAL,client=API,su=1,timeout=600,mtime=1495591213,user=admin,2CF4756i4DZ3lQ1rBn8t9epWMHYcWZ1TogQ"; httponly; Path=/; secure
+                 */
+                response.Headers.TryGetValues("Set-Cookie", out Cookies);
 
-        public static bool DoesValidCookieExist()
-        {
-            string Path = GetCookiePath();
-
-            if (File.Exists(Path))
-            {
-                try
+                if (Cookies != null && Cookies.Count() > 0)
                 {
-                    Cookie cookie = JsonConvert.DeserializeObject<Cookie>(File.ReadAllText(Path));
-                    return !cookie.Expired;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-            }
+                    string CookieString = Cookies.FirstOrDefault(x => x.StartsWith("ibapauth"));
 
-            return false;
-        }
-
-
-        private static bool IsRequestCookieStillValid(HttpRequestMessage request)
-        {
-            IEnumerable<string> RequestCookies;
-
-            if (request.Headers.TryGetValues("Cookie", out RequestCookies))
-            {
-                if (RequestCookies != null && RequestCookies.Any())
-                {
-                    string Temp = RequestCookies.FirstOrDefault(x => x.StartsWith("ibapauth"));
-
-                    if (!String.IsNullOrEmpty(Temp))
+                    if (!String.IsNullOrEmpty(CookieString))
                     {
-                        string[] RequestCookieParts = Temp.Split(';');
+                        string[] CookieParts = CookieString.Split(';');
 
-                        if (RequestCookieParts.Any())
+                        if (CookieParts.Any())
                         {
-                            string Expires = RequestCookieParts.FirstOrDefault(x => x.StartsWith("Expires"));
-
-                            DateTime Date;
-
-                            if (DateTime.TryParse(Expires, out Date))
+                            if (!String.IsNullOrEmpty(CookieParts[0]))
                             {
-                                return DateTime.Now < Date;
+                                Cookie Cookie = new Cookie("ibapauth", CookieParts[0].Replace("ibapauth=", ""), "", response.RequestMessage.RequestUri.Host);
+
+                                if (!String.IsNullOrEmpty(CookieParts.FirstOrDefault(x => x.Equals("secure", StringComparison.OrdinalIgnoreCase))))
+                                {
+                                    Cookie.Secure = true;
+                                }
+
+                                if (!String.IsNullOrEmpty(CookieParts.FirstOrDefault(x => x.Equals("httponly", StringComparison.OrdinalIgnoreCase))))
+                                {
+                                    Cookie.HttpOnly = true;
+                                }
+
+                                string TimeoutString = CookieParts.FirstOrDefault(x => x.Equals("timeout", StringComparison.OrdinalIgnoreCase));
+                                string ModifyTimeString = CookieParts.FirstOrDefault(x => x.Equals("mtime", StringComparison.OrdinalIgnoreCase));
+
+                                if (!String.IsNullOrEmpty(TimeoutString))
+                                {
+                                    try
+                                    {
+                                        string[] TimeoutParts = TimeoutString.Split('=');
+
+                                        if (TimeoutParts.Length == 2)
+                                        {
+                                            int Timeout;
+                                            if (Int32.TryParse(TimeoutParts[1], out Timeout))
+                                            {
+                                                string[] ModifyTimeParts = ModifyTimeString.Split('=');
+
+                                                if (ModifyTimeParts.Length == 2)
+                                                {
+                                                    int Modify;
+
+                                                    if (Int32.TryParse(ModifyTimeParts[1], out Modify))
+                                                    {
+                                                        Cookie.Expires = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Modify).AddSeconds(Timeout);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch (Exception)
+                                    { }
+                                }
+
+                                return Cookie;
                             }
                         }
                     }
                 }
             }
 
-            return false;
+            return null;
         }
 
-        private static void SetCookieFromResponse(HttpResponseMessage response)
+        private static void UpdateSessionDataCookieFromResponse(HttpResponseMessage response)
         {
-            IEnumerable<string> Cookies;
-
-            response.Headers.TryGetValues("Set-Cookie", out Cookies);
-
-            if (Cookies != null && Cookies.Count() > 0)
+            if (response.IsSuccessStatusCode)
             {
-                string[] CookieParts = Cookies.FirstOrDefault(x => x.StartsWith("ibapauth")).Split(';');
+                Cookie Cookie = GetResponseCookie(response);
 
-                if (CookieParts.Any())
+                if (Cookie != null &&
+                    !Cookie.Expired &&
+                    InfobloxSessionData.Cookie != null &&
+                    Cookie.Expires > InfobloxSessionData.Cookie.Expires
+                )
                 {
-                    if (!String.IsNullOrEmpty(CookieParts[0]))
-                    {
-                        Cookie Cookie = new Cookie("ibapauth", CookieParts[0].Replace("ibapauth=", ""), "", response.RequestMessage.RequestUri.Host)
-                        {
-                            Secure = true
-                        };
-
-                        InfobloxSessionData.Cookie = Cookie;
-                    }
+                    InfobloxSessionData.Cookie = Cookie;
                 }
             }
         }

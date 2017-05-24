@@ -25,17 +25,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         )]
         [ValidateNotNullOrEmpty()]
         [Alias("ComputerName")]
-        public string GridMaster
-        {
-            get
-            {
-                return InfobloxSessionData.GridMaster;
-            }
-            set
-            {
-                InfobloxSessionData.GridMaster = value;
-            }
-        }
+        public string GridMaster { get; set; }
 
         [Parameter(
             Mandatory = true,
@@ -43,17 +33,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         )]
         [ValidateNotNull()]
         [System.Management.Automation.Credential()]
-        public PSCredential Credential
-        {
-            get
-            {
-                return new PSCredential(InfobloxSessionData.Credential.UserName, InfobloxSessionData.Credential.Password);
-            }
-            set
-            {
-                InfobloxSessionData.Credential = new InfobloxCredential(value.UserName, value.Password);
-            }
-        }
+        public PSCredential Credential { get; set; }
 
         /// <summary>
         /// The API version to specify in the URL path. The function to build the URL string for the
@@ -67,17 +47,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             "1.5", "1.6", "1.6.1", "1.7", "1.7.1", "1.7.2", "1.7.3", "1.7.4", "2.0",
             "2.1", "2.1.1", "2.2", "2.2.1", "2.2.2", "2.3")]
         [ValidateNotNullOrEmpty()]
-        public string Version
-        {
-            get
-            {
-                return InfobloxSessionData.Version;
-            }
-            set
-            {
-                InfobloxSessionData.Version = value;
-            }
-        }
+        public string Version { get; set; }
 
         #region Override Methods
 
@@ -88,9 +58,11 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
         protected override void ProcessRecord()
         {
+            InfobloxSessionData.Reset();
+
             try
             {
-                if (InfobloxSessionData.Version.Equals("LATEST"))
+                if (this.Version.Equals("LATEST"))
                 {
                     using (HttpClient Client = CommandHelpers.BuildHttpClient(this.GridMaster, "1.0", this.Credential.UserName, this.Credential.Password).Result)
                     {
@@ -114,42 +86,36 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                             Versions = Versions.Select(x => { return new Version(x); }).OrderByDescending(x => x).Select(x => { return x.ToString(); });
 
                             WriteVerbose("Sorted versions");
-                            InfobloxSessionData.Version = Versions.First();
-                            WriteVerbose($"Latest supported version is {InfobloxSessionData.Version}");
+                            this.Version = Versions.First();
+                            WriteVerbose($"Latest supported version is {this.Version}");
                         }
                         else
                         {
                             WriteVerbose("Failed to get schema, reverting to using version 2.0");
-                            InfobloxSessionData.Version = "2.0";
+                            this.Version = "2.0";
                         }
                     }
                 }
 
+                WriteVerbose("Infoblox session data will be used now.");
+                InfobloxSessionData.GridMaster = this.GridMaster;
+                InfobloxSessionData.Credential = new InfobloxCredential(this.Credential.UserName, this.Credential.Password);
+                InfobloxSessionData.Version = this.Version;
+                InfobloxSessionData.UseSessionData = true;
+
                 using (HttpClient Client = CommandHelpers.BuildHttpClient(this.GridMaster, this.Version, this.Credential.UserName, this.Credential.Password).Result)
-                {
-                    IEnumerable<string> Cookies;
-
+                {                    
                     HttpResponseMessage Response = Client.GetAsync("grid").Result;
-                    Response.Headers.TryGetValues("Set-Cookie", out Cookies);
+                    Cookie Cookie = CommandHelpers.GetResponseCookie(Response);
 
-                    if (Cookies != null && Cookies.Count() > 0)
+                    if (Cookie != null)
                     {
-                        string[] CookieParts = Cookies.FirstOrDefault(x => x.StartsWith("ibapauth")).Split(';');
-
-                        if (CookieParts.Any())
-                        {
-                            WriteVerbose("Found an ibapauth cookie.");
-                            if (!String.IsNullOrEmpty(CookieParts[0]))
-                            {
-                                InfobloxSessionData.Cookie = new Cookie("ibapauth", CookieParts[0].Replace("ibapauth=", ""), "", Response.RequestMessage.RequestUri.Host)
-                                {
-                                    Secure = true
-                                };
-
-                                WriteVerbose("Infoblox session data will be used now.");
-                                InfobloxSessionData.UseSessionData = true;
-                            }
-                        }
+                        WriteVerbose("Infoblox cookie will be used for authentication.");
+                        InfobloxSessionData.Cookie = Cookie;                       
+                    }
+                    else
+                    {
+                        WriteWarning("Could not retrieve a valid cookie from the grid master.");
                     }
                 }
             }

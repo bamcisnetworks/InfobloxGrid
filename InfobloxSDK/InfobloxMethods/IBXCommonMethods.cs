@@ -8,6 +8,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
+using BAMCIS.Infoblox.Errors;
 
 namespace BAMCIS.Infoblox.InfobloxMethods
 {
@@ -23,19 +24,19 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public IBXCommonMethods()
+        public IBXCommonMethods(TimeSpan? timeout = null)
         {
             if (InfobloxSessionData.UseSessionData)
             {
-                if (!InfobloxSessionData.Cookie.Expired)
+                if (InfobloxSessionData.Cookie != null && !InfobloxSessionData.Cookie.Expired)
                 {
-                    this._Client = CommandHelpers.BuildHttpClient(InfobloxSessionData.GridMaster, InfobloxSessionData.Version, InfobloxSessionData.Cookie).Result;
+                    this._Client = CommandHelpers.BuildHttpClient(InfobloxSessionData.GridMaster, InfobloxSessionData.Version, InfobloxSessionData.Cookie, timeout).Result;
                 }
                 else
                 {
                     if (InfobloxSessionData.Credential != null)
                     {
-                        this._Client = CommandHelpers.BuildHttpClient(InfobloxSessionData.GridMaster, InfobloxSessionData.Version, InfobloxSessionData.Credential.UserName, InfobloxSessionData.Credential.Password).Result;
+                        this._Client = CommandHelpers.BuildHttpClient(InfobloxSessionData.GridMaster, InfobloxSessionData.Version, InfobloxSessionData.Credential.UserName, InfobloxSessionData.Credential.Password, timeout).Result;
                     }
                     else
                     {
@@ -49,19 +50,19 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public IBXCommonMethods(InfobloxSession session)
+        public IBXCommonMethods(InfobloxSession session, TimeSpan? timeout = null)
         {
             if (session != null)
             {
                 if (session.Cookie != null && !session.Cookie.Expired)
                 {
-                    this._Client = CommandHelpers.BuildHttpClient(session.GridMaster, session.Version, session.Cookie).Result;
+                    this._Client = CommandHelpers.BuildHttpClient(session.GridMaster, session.Version, session.Cookie, timeout).Result;
                 }
                 else
                 {
                     if (session.Credential != null)
                     {
-                        this._Client = CommandHelpers.BuildHttpClient(session.GridMaster, session.Version, session.Credential.UserName, session.Credential.Password).Result;
+                        this._Client = CommandHelpers.BuildHttpClient(session.GridMaster, session.Version, session.Credential.UserName, session.Credential.Password, timeout).Result;
                     }
                     else
                     {
@@ -75,15 +76,15 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public IBXCommonMethods(string gridMaster, string apiVersion, string username, SecureString password)
+        public IBXCommonMethods(string gridMaster, string apiVersion, string username, SecureString password, TimeSpan? timeout = null)
         {
             if (String.IsNullOrEmpty(username) || password == null)
             {
-                this._Client = CommandHelpers.BuildHttpClient(gridMaster, apiVersion).Result;
+                this._Client = CommandHelpers.BuildHttpClient(gridMaster, apiVersion, timeout).Result;
             }
             else
             {
-                this._Client = CommandHelpers.BuildHttpClient(gridMaster, apiVersion, username, password).Result;
+                this._Client = CommandHelpers.BuildHttpClient(gridMaster, apiVersion, username, password, timeout).Result;
             }
         }
 
@@ -342,7 +343,20 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             {
                 string Url = url.Replace(":", "%3a");
                 Console.WriteLine($"{this._Client.BaseAddress.ToString()}{Url}");
-                return CommandHelpers.ParseGetResponse<T>(await this._Client.GetAsync(Url));
+
+                try
+                {
+                    HttpResponseMessage Response = await this._Client.GetAsync(Url);
+                    return CommandHelpers.ParseGetResponse<T>(Response);
+                }
+                catch (InfobloxCustomException e)
+                {
+                    throw e;
+                }
+                catch (Exception e)
+                {
+                    throw new InfobloxCustomException(e);
+                }
             }
             else
             {
@@ -359,7 +373,19 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                     string Url = url.Replace(":", "%3a");
                     Console.WriteLine($"{this._Client.BaseAddress.ToString()}{Url}");
                     Console.WriteLine(data);
-                    return CommandHelpers.ParsePostPutDeleteResponse(await this.Client.PostAsync(Url, new StringContent(data, Encoding.UTF8, "application/json")));
+
+                    try
+                    {
+                        return CommandHelpers.ParsePostPutDeleteResponse(await this.Client.PostAsync(Url, new StringContent(data, Encoding.UTF8, "application/json")));
+                    }
+                    catch (InfobloxCustomException e)
+                    {
+                        throw e;
+                    }
+                    catch (Exception e)
+                    {
+                        throw new InfobloxCustomException(e);
+                    }
                 }
                 else
                 {
@@ -379,7 +405,19 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                 string Url = url.Replace(":", "%3a");
                 Console.WriteLine($"{this._Client.BaseAddress.ToString()}{Url}");
                 Console.WriteLine(data);
-                return CommandHelpers.ParsePostPutDeleteResponse(await this._Client.PutAsync(Url, new StringContent(data, Encoding.UTF8, "application/json")));
+
+                try
+                {
+                    return CommandHelpers.ParsePostPutDeleteResponse(await this._Client.PutAsync(Url, new StringContent(data, Encoding.UTF8, "application/json")));
+                }
+                catch (InfobloxCustomException e)
+                {
+                    throw e;
+                }
+                catch (Exception e)
+                {
+                    throw new InfobloxCustomException(e);
+                }
             }
             else
             {
@@ -393,7 +431,19 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             {
                 string Url = reference.Replace(":", "%3a");
                 Console.WriteLine($"{this._Client.BaseAddress.ToString()}{Url}");
-                return CommandHelpers.ParsePostPutDeleteResponse(await this._Client.DeleteAsync(Url));
+
+                try
+                {
+                    return CommandHelpers.ParsePostPutDeleteResponse(await this._Client.DeleteAsync(Url));
+                }
+                catch (InfobloxCustomException e)
+                {
+                    throw e;
+                }
+                catch (Exception e)
+                {
+                    throw new InfobloxCustomException(e);
+                }
             }
             else
             {
