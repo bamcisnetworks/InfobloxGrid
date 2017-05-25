@@ -50,7 +50,7 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <summary>
         /// Writes an IEnumerable of Exceptions to the provided PSHost console. This 
         /// function allows us to print in both PowerShell ISE and the regular PowerShell
-        /// console. It tries to get a PSHost even if one isn't provided to
+        /// console. It tries to get a PSHost even if one isn't provided
         /// </summary>
         /// <param name="exceptions">The exceptions to print</param>
         /// <param name="host">The PSHost to write the content out to.</param>
@@ -97,21 +97,25 @@ namespace BAMCIS.Infoblox.PowerShell
                 foreach (Exception Ex in exceptions)
                 {
                     UserInterface.WriteLine();
-                    UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, "ERROR:            " + Ex.GetType().FullName);
-                    UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, "MESSAGE:          " + Ex.Message);
-
+                    UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black,     $"ERROR:             {Ex.GetType().FullName}");
+                    
                     if (Ex.GetType() == typeof(InfobloxCustomException))
                     {
                         InfobloxCustomException ce = (InfobloxCustomException)Ex;
-                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, "HTTP ERROR:       " + ce.Error);
-                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, "HTTP CODE:        " + ce.HttpCode);
-                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, "HTTP STATUS CODE: " + ce.HttpStatusCode);
-                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, "HTTP MESSAGE:     " + ce.HttpMessage);
+                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, $"INFOBLOX ERROR:    {ce.Error}");
+                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, $"INFOBLOX TEXT:     {ce.Text}");
+                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, $"HTTP STATUS CODE:  {ce.HttpResponseCode}");
+                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, $"HTTP STATUS:       {ce.HttpStatus}");
+                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, $"HTTP ERROR REASON: {ce.HttpErrorReason}");
+                    }
+                    else
+                    {
+                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, $"MESSAGE:           {Ex.Message}");
                     }
 
                     if (!String.IsNullOrEmpty(Ex.StackTrace))
                     {
-                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, "STACK TRACE:      " + Ex.StackTrace);
+                        UserInterface.WriteLine(ConsoleColor.Red, ConsoleColor.Black, $"STACK TRACE:       {Ex.StackTrace}");
                     }
 
                     UserInterface.WriteLine();
@@ -121,32 +125,36 @@ namespace BAMCIS.Infoblox.PowerShell
             {
                 foreach (Exception Ex in exceptions)
                 {
-                    ConsoleColor originalBackground = Console.BackgroundColor;
-                    ConsoleColor originalForeground = Console.ForegroundColor;
+                    ConsoleColor OriginalBackground = Console.BackgroundColor;
+                    ConsoleColor OriginalForeground = Console.ForegroundColor;
 
                     Console.WriteLine();
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.BackgroundColor = ConsoleColor.Black;
-                    Console.WriteLine("ERROR:            " + Ex.GetType().FullName);
-                    Console.WriteLine("MESSAGE:          " + Ex.Message);
-
+                    Console.WriteLine($"ERROR:             {Ex.GetType().FullName}");
+                    
                     if (Ex.GetType() == typeof(InfobloxCustomException))
                     {
-                        InfobloxCustomException ce = (InfobloxCustomException)Ex;
-                        Console.WriteLine("HTTP ERROR:       " + ce.Error);
-                        Console.WriteLine("HTTP CODE:        " + ce.HttpCode);
-                        Console.WriteLine("HTTP STATUS CODE: " + ce.HttpStatusCode);
-                        Console.WriteLine("HTTP MESSAGE:     " + ce.HttpMessage);
+                        InfobloxCustomException IbxEx = (InfobloxCustomException)Ex;
+                        Console.WriteLine($"INFOBLOX ERROR:    {IbxEx.Error}");
+                        Console.WriteLine($"INFOBLOX TEXT:     {IbxEx.Text}");    
+                        Console.WriteLine($"HTTP STATUS CODE:  {IbxEx.HttpResponseCode}");
+                        Console.WriteLine($"HTTP STATUS:       {IbxEx.HttpStatus}");
+                        Console.WriteLine($"HTTP ERROR REASON: {IbxEx.HttpErrorReason}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"MESSAGE:           {Ex.Message}");
                     }
 
                     if (!String.IsNullOrEmpty(Ex.StackTrace))
                     {
-                        Console.WriteLine("STACK TRACE:      " + Ex.StackTrace);
+                        Console.WriteLine($"STACK TRACE:       {Ex.StackTrace}");
                     }
 
                     //Reset console colors
-                    Console.BackgroundColor = originalBackground;
-                    Console.ForegroundColor = originalForeground;
+                    Console.BackgroundColor = OriginalBackground;
+                    Console.ForegroundColor = OriginalForeground;
                     Console.WriteLine();
                 }
             }

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 using BAMCIS.Infoblox.Errors;
+using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxMethods
 {
@@ -353,6 +354,21 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                 {
                     throw e;
                 }
+                catch (WebException e)
+                {
+                    throw new InfobloxCustomException(e);
+                }
+                catch (HttpRequestException e)
+                {
+                    if (e.InnerException is WebException)
+                    {
+                        throw new InfobloxCustomException((WebException)e.InnerException);
+                    }
+                    else
+                    {
+                        throw new InfobloxCustomException(e);
+                    }
+                }
                 catch (Exception e)
                 {
                     throw new InfobloxCustomException(e);
@@ -381,6 +397,21 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                     catch (InfobloxCustomException e)
                     {
                         throw e;
+                    }
+                    catch (WebException e)
+                    {
+                        throw new InfobloxCustomException(e);
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        if (e.InnerException is WebException)
+                        {
+                            throw new InfobloxCustomException((WebException)e.InnerException);
+                        }
+                        else
+                        {
+                            throw new InfobloxCustomException(e);
+                        }
                     }
                     catch (Exception e)
                     {
@@ -414,6 +445,21 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                 {
                     throw e;
                 }
+                catch (WebException e)
+                {
+                    throw new InfobloxCustomException(e);
+                }
+                catch (HttpRequestException e)
+                {
+                    if (e.InnerException is WebException)
+                    {
+                        throw new InfobloxCustomException((WebException)e.InnerException);
+                    }
+                    else
+                    {
+                        throw new InfobloxCustomException(e);
+                    }
+                }
                 catch (Exception e)
                 {
                     throw new InfobloxCustomException(e);
@@ -439,6 +485,21 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                 catch (InfobloxCustomException e)
                 {
                     throw e;
+                }
+                catch (WebException e)
+                {
+                    throw new InfobloxCustomException(e);
+                }
+                catch (HttpRequestException e)
+                {
+                    if (e.InnerException is WebException)
+                    {
+                        throw new InfobloxCustomException((WebException)e.InnerException);
+                    }
+                    else
+                    {
+                        throw new InfobloxCustomException(e);
+                    }
                 }
                 catch (Exception e)
                 {

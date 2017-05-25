@@ -373,7 +373,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
                         catch (AggregateException ae)
                         {
                             PSCommon.WriteExceptions(ae, this.Host);
-                            this.ThrowTerminatingError(new ErrorRecord(ae.Flatten(), ae.GetType().FullName, ErrorCategory.NotSpecified, this));
+                            this.ThrowTerminatingError(new ErrorRecord(ae.InnerException, ae.InnerException.GetType().FullName, ErrorCategory.NotSpecified, this));
                         }
                         catch (Exception e)
                         {
@@ -396,7 +396,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
                         catch (AggregateException ae)
                         {
                             PSCommon.WriteExceptions(ae, this.Host);
-                            this.ThrowTerminatingError(new ErrorRecord(ae.Flatten(), ae.GetType().FullName, ErrorCategory.NotSpecified, this));
+                            this.ThrowTerminatingError(new ErrorRecord(ae.InnerException, ae.InnerException.GetType().FullName, ErrorCategory.NotSpecified, this));
                         }
                         catch (Exception e)
                         {
@@ -419,7 +419,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
                         catch (AggregateException ae)
                         {
                             PSCommon.WriteExceptions(ae, this.Host);
-                            this.ThrowTerminatingError(new ErrorRecord(ae.Flatten(), ae.GetType().FullName, ErrorCategory.NotSpecified, this));
+                            this.ThrowTerminatingError(new ErrorRecord(ae.InnerException, ae.InnerException.GetType().FullName, ErrorCategory.NotSpecified, this));
                         }
                         catch (Exception e)
                         {

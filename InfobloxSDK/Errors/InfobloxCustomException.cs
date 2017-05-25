@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net.Http;
 using Newtonsoft.Json;
+using System.Net;
+using System.IO;
 
 namespace BAMCIS.Infoblox.Errors
 {
@@ -8,11 +10,11 @@ namespace BAMCIS.Infoblox.Errors
     {
         private string _message;
 
-        public string Text { get; set; }
-        public int HttpCode { get; set; }
-        public string HttpStatusCode { get; set; }
-        public string HttpMessage { get; set; }
-        public string Error { get; set; }
+        public string Text { get; private set; }
+        public int HttpResponseCode { get; private set; }
+        public string HttpStatus { get; private set; }
+        public string HttpErrorReason { get; private set; }
+        public string Error { get; private set; }
 
         public InfobloxCustomException(HttpResponseMessage response)
         {
@@ -25,17 +27,54 @@ namespace BAMCIS.Infoblox.Errors
                 this._message = error.text;
                 this.Error = error.Error.Trim('\r').Trim('\n').Trim('\r');
                 this.Text = error.text;
-                this.HttpCode = (int)response.StatusCode;
-                this.HttpStatusCode = response.StatusCode.ToString();
-                this.HttpMessage = response.ReasonPhrase;
+                this.Source = error.code;
             }
             catch (Exception)
             {
                 this._message = Temp;
                 this.Text = Temp;
-                this.HttpCode = (int)response.StatusCode;
-                this.HttpStatusCode = response.StatusCode.ToString();
-                this.HttpMessage = response.ReasonPhrase;
+                this.Error = Temp;
+            }
+
+            this.HttpResponseCode = (int)response.StatusCode;
+            this.HttpStatus = response.StatusCode.ToString();
+            this.HttpErrorReason = response.ReasonPhrase;
+        }
+
+        public InfobloxCustomException(WebException e)
+        {
+            if (e != null)
+            {
+                if (e.Response != null)
+                {
+                    using (StreamReader Reader = new StreamReader(e.Response.GetResponseStream()))
+                    {
+                        this._message = Reader.ReadToEnd();
+                    }
+
+                    if (e.Status == WebExceptionStatus.ProtocolError)
+                    {
+                        HttpWebResponse Response = (HttpWebResponse)e.Response;
+
+                        if (Response != null)
+                        {
+                            this.HttpStatus = Response.StatusCode.ToString();
+                            this.HttpResponseCode = (int)Response.StatusCode;
+                            this.HttpErrorReason = Response.StatusDescription;
+                        }
+                    }
+                }
+                else
+                {
+                    this._message = e.Message;
+                }
+
+                this.Text = this._message;
+                this.Error = e.Status.ToString();
+            }
+            else
+            {
+                throw new ArgumentNullException("e", "The WebException parameter cannot be null.");
             }
         }
 
@@ -43,9 +82,10 @@ namespace BAMCIS.Infoblox.Errors
         {
             this._message = e.Message;
             this.Text = e.Message;
-            this.HttpMessage = e.GetType().FullName;
-            this.HttpCode = e.HResult;
-            this.HttpStatusCode = e.Source;
+            this.Error = e.HResult.ToString();
+            this.HttpErrorReason = e.Message;
+            this.HttpResponseCode = 0;
+            this.HttpStatus = e.GetType().FullName;
         }
 
         public InfobloxCustomException(string Message)

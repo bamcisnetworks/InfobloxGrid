@@ -1,10 +1,4 @@
-﻿#if (NETSTANDARD2_0 || NETSTANDARD1_6 || NETSTANDARD1_5 || NETSTANDARD1_4 || NETSTANDARD1_3 || NETSTANDARD1_2 || NETSTANDARD1_1 || NETSTANDARD1_0)
-#define NETSTANDARD 
-#else
-#define NET
-#endif
-
-using BAMCIS.Infoblox.Errors;
+﻿using BAMCIS.Infoblox.Errors;
 using BAMCIS.Infoblox.InfobloxMethods;
 using Newtonsoft.Json;
 using System;
@@ -294,19 +288,19 @@ namespace BAMCIS.Infoblox.Common
                  */
                 response.Headers.TryGetValues("Set-Cookie", out Cookies);
 
-                if (Cookies != null && Cookies.Count() > 0)
+                if (Cookies != null && Cookies.Any())
                 {
                     string CookieString = Cookies.FirstOrDefault(x => x.StartsWith("ibapauth"));
 
                     if (!String.IsNullOrEmpty(CookieString))
                     {
-                        string[] CookieParts = CookieString.Split(';');
+                        IEnumerable<string> CookieParts = CookieString.Split(';').Select(x => { return x.Trim(); });
 
                         if (CookieParts.Any())
                         {
-                            if (!String.IsNullOrEmpty(CookieParts[0]))
+                            if (!String.IsNullOrEmpty(CookieParts.First()))
                             {
-                                Cookie Cookie = new Cookie("ibapauth", CookieParts[0].Replace("ibapauth=", ""), "", response.RequestMessage.RequestUri.Host);
+                                Cookie Cookie = new Cookie("ibapauth", CookieParts.First().Replace("ibapauth=", ""), "", response.RequestMessage.RequestUri.Host);
 
                                 if (!String.IsNullOrEmpty(CookieParts.FirstOrDefault(x => x.Equals("secure", StringComparison.OrdinalIgnoreCase))))
                                 {
@@ -318,10 +312,11 @@ namespace BAMCIS.Infoblox.Common
                                     Cookie.HttpOnly = true;
                                 }
 
-                                string TimeoutString = CookieParts.FirstOrDefault(x => x.Equals("timeout", StringComparison.OrdinalIgnoreCase));
-                                string ModifyTimeString = CookieParts.FirstOrDefault(x => x.Equals("mtime", StringComparison.OrdinalIgnoreCase));
+                                string[] ValueParts = CookieParts.First().Split(',');
+                                string TimeoutString = ValueParts.FirstOrDefault(x => x.StartsWith("timeout=", StringComparison.OrdinalIgnoreCase));
+                                string ModifyTimeString = ValueParts.FirstOrDefault(x => x.StartsWith("mtime=", StringComparison.OrdinalIgnoreCase));
 
-                                if (!String.IsNullOrEmpty(TimeoutString))
+                                if (!String.IsNullOrEmpty(TimeoutString) && !String.IsNullOrEmpty(ModifyTimeString))
                                 {
                                     try
                                     {
@@ -347,7 +342,8 @@ namespace BAMCIS.Infoblox.Common
                                         }
                                     }
                                     catch (Exception)
-                                    { }
+                                    {
+                                    }
                                 }
 
                                 return Cookie;
@@ -366,13 +362,19 @@ namespace BAMCIS.Infoblox.Common
             {
                 Cookie Cookie = GetResponseCookie(response);
 
-                if (Cookie != null &&
-                    !Cookie.Expired &&
-                    InfobloxSessionData.Cookie != null &&
-                    Cookie.Expires > InfobloxSessionData.Cookie.Expires
-                )
+                if (Cookie != null && !Cookie.Expired)
                 {
-                    InfobloxSessionData.Cookie = Cookie;
+                    if (InfobloxSessionData.Cookie != null)
+                    {
+                        if (Cookie.Expires.ToUniversalTime() > InfobloxSessionData.Cookie.Expires.ToUniversalTime())
+                        {
+                            InfobloxSessionData.Cookie = Cookie;
+                        }
+                    }
+                    else
+                    {
+                        InfobloxSessionData.Cookie = Cookie;
+                    }
                 }
             }
         }
