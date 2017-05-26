@@ -1,4 +1,5 @@
 ﻿using BAMCIS.Infoblox.Common;
+using BAMCIS.Infoblox.Errors;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -87,31 +88,59 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                 {
                     WriteVerbose("Getting supported versions.");
 
-                    HttpResponseMessage Response = Client.GetAsync("?_schema").Result;
-
-                    WriteVerbose(Response.RequestMessage.RequestUri.ToString());
-
-                    if (Response.IsSuccessStatusCode)
+                    try
                     {
-                        string Content = Response.Content.ReadAsStringAsync().Result;
+                        HttpResponseMessage Response = Client.GetAsync("?_schema").Result;
 
-                        WriteVerbose($"Response {Content}");
+                        WriteVerbose(Response.RequestMessage.RequestUri.ToString());
 
-                        dynamic Obj = JsonConvert.DeserializeObject(Content);
-                        IEnumerable<string> Versions = Obj.supported_versions;
+                        if (Response.IsSuccessStatusCode)
+                        {
+                            string Content = Response.Content.ReadAsStringAsync().Result;
 
-                        WriteVerbose("Got versions");
+                            WriteVerbose($"Response {Content}");
 
-                        Versions = Versions.Select(x => { return new Version(x); }).OrderByDescending(x => x).Select(x => { return x.ToString(); });
+                            dynamic Obj = JsonConvert.DeserializeObject(Content);
+                            IEnumerable<string> Versions = Obj.supported_versions;
 
-                        WriteVerbose("Sorted versions");
-                        this.Version = Versions.First();
-                        WriteVerbose($"Latest supported version is {this.Version}");
+                            WriteVerbose("Got versions");
+
+                            Versions = Versions.Select(x => { return new Version(x); }).OrderByDescending(x => x).Select(x => { return x.ToString(); });
+
+                            WriteVerbose("Sorted versions");
+                            this.Version = Versions.First();
+                            WriteVerbose($"Latest supported version is {this.Version}");
+                        }
+                        else
+                        {
+                            WriteVerbose("Failed to get schema, reverting to using version 2.0");
+                            this.Version = "2.0";
+                        }
                     }
-                    else
+                    catch (WebException e)
                     {
-                        WriteVerbose("Failed to get schema, reverting to using version 2.0");
-                        this.Version = "2.0";
+                        InfobloxCustomException Ex = new InfobloxCustomException(e);
+                        PSCommon.WriteExceptions(Ex, this.Host);
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        InfobloxCustomException Ex;
+
+                        if (e.InnerException is WebException)
+                        {
+                            Ex = new InfobloxCustomException((WebException)e.InnerException);
+                        }
+                        else
+                        {
+                            Ex = new InfobloxCustomException(e);
+                        }
+
+                        PSCommon.WriteExceptions(Ex, this.Host);
+                    }
+                    catch (Exception e)
+                    {
+                        InfobloxCustomException Ex = new InfobloxCustomException(e);
+                        PSCommon.WriteExceptions(Ex, this.Host);
                     }
                 }
             }
@@ -125,17 +154,49 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
             using (HttpClient Client = CommandHelpers.BuildHttpClient(this.GridMaster, this.Version, this.Credential.UserName, this.Credential.Password).Result)
             {
-                HttpResponseMessage Response = Client.GetAsync("grid").Result;
-
-                Cookie Cookie = CommandHelpers.GetResponseCookie(Response);
-
-                if (Cookie != null && !Cookie.Expired)
+                try
                 {
-                    Session.Cookie = Cookie;
+                    HttpResponseMessage Response = Client.GetAsync("grid").Result;
+
+                    Cookie Cookie = CommandHelpers.GetResponseCookie(Response);
+
+                    if (Cookie != null && !Cookie.Expired)
+                    {
+                        Session.Cookie = Cookie;
+                    }
+
+                    WriteObject(Session);
+                }
+                catch (WebException e)
+                {
+                    InfobloxCustomException Ex = new InfobloxCustomException(e);
+                    PSCommon.WriteExceptions(Ex, this.Host);
+                    this.ThrowTerminatingError(new ErrorRecord(Ex, Ex.HttpStatus, ErrorCategory.NotSpecified, this));
+                }
+                catch (HttpRequestException e)
+                {
+                    InfobloxCustomException Ex;
+
+                    if (e.InnerException is WebException)
+                    {
+                        Ex = new InfobloxCustomException((WebException)e.InnerException);
+                    }
+                    else
+                    {
+                        Ex = new InfobloxCustomException(e);
+                    }
+
+                    PSCommon.WriteExceptions(Ex, this.Host);
+
+                    this.ThrowTerminatingError(new ErrorRecord(Ex, Ex.HttpStatus, ErrorCategory.NotSpecified, this));
+                }
+                catch (Exception e)
+                {
+                    InfobloxCustomException Ex = new InfobloxCustomException(e);
+                    PSCommon.WriteExceptions(Ex, this.Host);
+                    this.ThrowTerminatingError(new ErrorRecord(Ex, Ex.HttpStatus, ErrorCategory.NotSpecified, this));
                 }
             }
-
-            WriteObject(Session);
         }
 
         protected override void EndProcessing()

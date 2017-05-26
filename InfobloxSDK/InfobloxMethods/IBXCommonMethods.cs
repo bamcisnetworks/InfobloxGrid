@@ -89,15 +89,15 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public async Task<T> SearchIbxObject<T>(SearchType searchType, string searchField, string value)
+        public async Task<IEnumerable<T>> SearchIbxObject<T>(SearchType searchType, string searchField, string value)
         {
             if (ExtensionMethods.IsInfobloxType<T>())
             {
-                return await this.GetAsync<T>(CommandHelpers.BuildGetSearchRequest<T>(searchType, searchField, value));
+                return await this.SearchAsync<T>(CommandHelpers.BuildGetSearchRequest<T>(searchType, searchField, value));
             }
             else
             {
-                throw new ArgumentException(String.Format("The type must be a valid infoblox object type, {0} was provided.", typeof(T).Name));
+                throw new ArgumentException($"The type must be a valid infoblox object type, { typeof(T).FullName} was provided.");
             }
         }
 
@@ -349,6 +349,48 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                 {
                     HttpResponseMessage Response = await this._Client.GetAsync(Url);
                     return CommandHelpers.ParseGetResponse<T>(Response);
+                }
+                catch (InfobloxCustomException e)
+                {
+                    throw e;
+                }
+                catch (WebException e)
+                {
+                    throw new InfobloxCustomException(e);
+                }
+                catch (HttpRequestException e)
+                {
+                    if (e.InnerException is WebException)
+                    {
+                        throw new InfobloxCustomException((WebException)e.InnerException);
+                    }
+                    else
+                    {
+                        throw new InfobloxCustomException(e);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new InfobloxCustomException(e);
+                }
+            }
+            else
+            {
+                throw new ArgumentNullException("url", "The url string cannot be null or empty.");
+            }
+        }
+
+        private async Task<IEnumerable<T>> SearchAsync<T>(string url)
+        {
+            if (!String.IsNullOrEmpty(url))
+            {
+                string Url = url.Replace(":", "%3a");
+                Console.WriteLine($"{this._Client.BaseAddress.ToString()}{Url}");
+
+                try
+                {
+                    HttpResponseMessage Response = await this._Client.GetAsync(Url);
+                    return CommandHelpers.ParseGetSearchResponse<T>(Response);
                 }
                 catch (InfobloxCustomException e)
                 {

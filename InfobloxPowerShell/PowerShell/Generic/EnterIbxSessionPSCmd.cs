@@ -1,4 +1,5 @@
 ﻿using BAMCIS.Infoblox.Common;
+using BAMCIS.Infoblox.Errors;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -60,14 +61,14 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         {
             InfobloxSessionData.Reset();
 
-            try
+            if (this.Version.Equals("LATEST"))
             {
-                if (this.Version.Equals("LATEST"))
+                using (HttpClient Client = CommandHelpers.BuildHttpClient(this.GridMaster, "1.0", this.Credential.UserName, this.Credential.Password).Result)
                 {
-                    using (HttpClient Client = CommandHelpers.BuildHttpClient(this.GridMaster, "1.0", this.Credential.UserName, this.Credential.Password).Result)
-                    {
-                        WriteVerbose("Getting supported versions.");
+                    WriteVerbose("Getting supported versions.");
 
+                    try
+                    {
                         HttpResponseMessage Response = Client.GetAsync("?_schema").Result;
 
                         WriteVerbose(Response.RequestMessage.RequestUri.ToString());
@@ -95,39 +96,87 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                             this.Version = "2.0";
                         }
                     }
+                    catch (WebException e)
+                    {
+                        InfobloxCustomException Ex = new InfobloxCustomException(e);
+                        PSCommon.WriteExceptions(Ex, this.Host);
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        InfobloxCustomException Ex;
+
+                        if (e.InnerException is WebException)
+                        {
+                            Ex = new InfobloxCustomException((WebException)e.InnerException);
+                        }
+                        else
+                        {
+                            Ex = new InfobloxCustomException(e);
+                        }
+
+                        PSCommon.WriteExceptions(Ex, this.Host);
+                    }
+                    catch (Exception e)
+                    {
+                        InfobloxCustomException Ex = new InfobloxCustomException(e);
+                        PSCommon.WriteExceptions(Ex, this.Host);
+                    }
                 }
+            }
 
-                WriteVerbose("Infoblox session data will be used now.");
-                InfobloxSessionData.GridMaster = this.GridMaster;
-                InfobloxSessionData.Credential = new InfobloxCredential(this.Credential.UserName, this.Credential.Password);
-                InfobloxSessionData.Version = this.Version;
-                InfobloxSessionData.UseSessionData = true;
 
-                using (HttpClient Client = CommandHelpers.BuildHttpClient(this.GridMaster, this.Version, this.Credential.UserName, this.Credential.Password).Result)
-                {                    
+            WriteVerbose("Infoblox session data will be used now.");
+            InfobloxSessionData.GridMaster = this.GridMaster;
+            InfobloxSessionData.Credential = new InfobloxCredential(this.Credential.UserName, this.Credential.Password);
+            InfobloxSessionData.Version = this.Version;
+            InfobloxSessionData.UseSessionData = true;
+
+            using (HttpClient Client = CommandHelpers.BuildHttpClient(this.GridMaster, this.Version, this.Credential.UserName, this.Credential.Password).Result)
+            {
+                try
+                {
                     HttpResponseMessage Response = Client.GetAsync("grid").Result;
                     Cookie Cookie = CommandHelpers.GetResponseCookie(Response);
 
                     if (Cookie != null)
                     {
                         WriteVerbose("Infoblox cookie will be used for authentication.");
-                        InfobloxSessionData.Cookie = Cookie;                       
+                        InfobloxSessionData.Cookie = Cookie;
                     }
                     else
                     {
                         WriteWarning("Could not retrieve a valid cookie from the grid master.");
                     }
                 }
-            }
-            catch (AggregateException ae)
-            {
-                PSCommon.WriteExceptions(ae, this.Host);
-                this.ThrowTerminatingError(new ErrorRecord(ae.InnerException, ae.InnerException.GetType().FullName, ErrorCategory.NotSpecified, this));
-            }
-            catch (Exception e)
-            {
-                PSCommon.WriteExceptions(e, this.Host);
-                this.ThrowTerminatingError(new ErrorRecord(e, e.GetType().FullName, ErrorCategory.NotSpecified, this));
+                catch (WebException e)
+                {
+                    InfobloxCustomException Ex = new InfobloxCustomException(e);
+                    PSCommon.WriteExceptions(Ex, this.Host);
+                    this.ThrowTerminatingError(new ErrorRecord(Ex, Ex.HttpStatus, ErrorCategory.NotSpecified, this));
+                }
+                catch (HttpRequestException e)
+                {
+                    InfobloxCustomException Ex;
+
+                    if (e.InnerException is WebException)
+                    {
+                        Ex = new InfobloxCustomException((WebException)e.InnerException);
+                    }
+                    else
+                    {
+                        Ex = new InfobloxCustomException(e);
+                    }
+
+                    PSCommon.WriteExceptions(Ex, this.Host);
+
+                    this.ThrowTerminatingError(new ErrorRecord(Ex, Ex.HttpStatus, ErrorCategory.NotSpecified, this));
+                }
+                catch (Exception e)
+                {
+                    InfobloxCustomException Ex = new InfobloxCustomException(e);
+                    PSCommon.WriteExceptions(Ex, this.Host);
+                    this.ThrowTerminatingError(new ErrorRecord(Ex, Ex.HttpStatus, ErrorCategory.NotSpecified, this));
+                }
             }
         }
 

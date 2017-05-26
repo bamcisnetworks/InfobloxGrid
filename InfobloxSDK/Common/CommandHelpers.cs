@@ -262,6 +262,20 @@ namespace BAMCIS.Infoblox.Common
             }
         }
 
+        internal static IEnumerable<T> ParseGetSearchResponse<T>(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                CommandHelpers.UpdateSessionDataCookieFromResponse(response);
+
+                return JsonConvert.DeserializeObject<IEnumerable<T>>(response.Content.ReadAsStringAsync().Result);
+            }
+            else
+            {
+                throw new InfobloxCustomException(response);
+            }
+        }
+
         internal static object ParseGetResponse(HttpResponseMessage response, Type type)
         {
             if (response.IsSuccessStatusCode)

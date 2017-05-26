@@ -63,6 +63,11 @@ namespace BAMCIS.Infoblox.Errors
                             this.HttpErrorReason = Response.StatusDescription;
                         }
                     }
+                    else
+                    {
+                        this.HttpStatus = e.Status.ToString();
+                        this.HttpErrorReason = e.Status.ToString();
+                    }
                 }
                 else
                 {
