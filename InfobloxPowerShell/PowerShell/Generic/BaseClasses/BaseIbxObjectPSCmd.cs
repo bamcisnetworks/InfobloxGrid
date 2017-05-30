@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxMethods;
 using Newtonsoft.Json;
 using System;
@@ -78,6 +78,8 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         protected string _Version = "LATEST";
         protected InfobloxSession _Session = null;
         protected UInt32 _Timeout = 100;
+
+        protected IEnumerable<string> _FieldsToReturn;
 
         #region Parameters
 
@@ -204,6 +206,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         }
 
         #region Override Methods
+
         protected override void BeginProcessing()
         {
             try
@@ -301,7 +304,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             }
         }
 
-        protected void ProcessByNewObject(object newObject)
+        protected virtual void ProcessByNewObject(object newObject)
         {
             if (newObject != null)
             {
@@ -334,7 +337,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                 }
                 else
                 {
-
+                    throw new PSArgumentException("newObject", $"The new object must be an Infoblox type, {newObject.GetType().FullName} was provided.");
                 }
             }
             else
@@ -343,7 +346,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             }
         }
 
-        protected void ProcessByUpdatedObject(object updatedObject, bool removeEmpty)
+        protected virtual void ProcessByUpdatedObject(object updatedObject, bool removeEmpty)
         {
             if (!this.MyInvocation.BoundParameters.ContainsKey("RemoveEmptyProperties"))
             {
@@ -396,7 +399,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             }
         }
 
-        protected void ProcessByAttributeForNewObject(string attribute, List<KeyValuePair<string, string>> additionalProperties)
+        protected virtual void ProcessByAttributeForNewObject(string attribute, List<KeyValuePair<string, string>> additionalProperties)
         {
             if (this.ParameterDictionary.ContainsKey(attribute))
             {
@@ -455,12 +458,12 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             }
         }
 
-        protected void ProcessByAttributeForNewObject(string attribute)
+        protected virtual void ProcessByAttributeForNewObject(string attribute)
         {
             ProcessByAttributeForNewObject(attribute, null);
         }
 
-        protected void ProcessByAttributeForUpdatedObject(string attribute, List<KeyValuePair<string, string>> additionalProperties)
+        protected virtual void ProcessByAttributeForUpdatedObject(string attribute, List<KeyValuePair<string, string>> additionalProperties)
         {
             if (this.ParameterDictionary.ContainsKey(attribute))
             {
@@ -519,7 +522,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
             }
         }
 
-        protected void ProcessByAttributeForUpdatedObject(string attribute)
+        protected virtual void ProcessByAttributeForUpdatedObject(string attribute)
         {
             ProcessByAttributeForUpdatedObject(attribute, null);
         }

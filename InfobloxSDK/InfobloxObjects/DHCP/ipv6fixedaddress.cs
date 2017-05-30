@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -28,7 +28,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "domain_name", out this._domain_name);
+                NetworkAddressTest.IsFqdn(value, "domain_name", out this._domain_name, false, true);
             }
         }
         public string[] domain_name_servers
@@ -43,7 +43,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 foreach(string val in value)
                 {
                     IPAddress ip;
-                    if (NetworkAddressTest.isIPv6(val, out ip))
+                    if (NetworkAddressTest.IsIPv6Address(val, out ip))
                     {
                         this._domain_name_servers.Add(ip.ToString());
                     }
@@ -64,7 +64,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsIPv6DUIDWithException(value, out this._duid);
+                NetworkAddressTest.IsIPv6DUID(value, out this._duid, false, true);
             }
         }
         [SearchableAttribute(Equality = true, Regex = true)]

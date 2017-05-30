@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.Enums;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.Enums;
 
 namespace BAMCIS.Infoblox.InfobloxObjects
 {
@@ -22,7 +22,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "member", out this._member);
+                NetworkAddressTest.IsFqdn(value, "member", out this._member, false, true);
             }
         }
         [ReadOnlyAttribute]

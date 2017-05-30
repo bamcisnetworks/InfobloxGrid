@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
 using System;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
@@ -18,7 +18,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "domain_name", out this._domain_name);
+                NetworkAddressTest.IsFqdn(value, "domain_name", out this._domain_name, true, true);
             }
         }
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]

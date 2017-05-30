@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
 using System;
 using System.Collections.Generic;
 

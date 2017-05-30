@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Discovery;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Discovery;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
 {
@@ -17,7 +17,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
             }
             internal protected set
             {
-                NetworkAddressTest.isIPWithException(value, out this._address);
+                NetworkAddressTest.IsIPAddress(value, out this._address, false, true);
             }
         }
         [ReadOnlyAttribute]
@@ -36,7 +36,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
             }
             internal protected set
             {
-                NetworkAddressTest.IsMACWithExceptionAllowEmpty(value, out this._mac);
+                NetworkAddressTest.IsMAC(value, out this._mac, true, true);
             }
         }
         [ReadOnlyAttribute]

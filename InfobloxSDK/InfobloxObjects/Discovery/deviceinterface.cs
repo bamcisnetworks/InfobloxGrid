@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Discovery;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Discovery;
 using System;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
@@ -123,7 +123,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
             }
             internal protected set
             {
-                NetworkAddressTest.IsMACWithExceptionAllowEmpty(value, out this._mac);
+                NetworkAddressTest.IsMAC(value, out this._mac, true, true);
             }
         }
         [ReadOnlyAttribute]

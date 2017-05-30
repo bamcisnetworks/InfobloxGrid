@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
 using System;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.DNS.Shared
@@ -20,7 +20,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS.Shared
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "dns_mail_exchanger", out this._dns_mail_exchanger);
+                NetworkAddressTest.IsFqdn(value, "dns_mail_exchanger", out this._dns_mail_exchanger, false, true);
             }
         }
         [Required]
@@ -33,7 +33,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS.Shared
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "mail_exchanger", out this._mail_exchanger);
+                NetworkAddressTest.IsFqdn(value, "mail_exchanger", out this._mail_exchanger, false, true);
             }
         }
         [Required]

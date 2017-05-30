@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxMethods;
 using BAMCIS.Infoblox.PowerShell.Generic;
 using System;
@@ -132,7 +132,8 @@ namespace BAMCIS.Infoblox.PowerShell.DHCP
         {
             base.GetDynamicParameters();
 
-            if (this.InputObject == null)
+            if (!this.MyInvocation.BoundParameters.ContainsKey("InputObject"))
+            //if (this.InputObject == null)
             {
                 RuntimeDefinedParameter param = IBXDynamicParameters.DhcpType(true);
                 base.ParameterDictionary.Add(param.Name, param);
@@ -181,7 +182,7 @@ namespace BAMCIS.Infoblox.PowerShell.DHCP
                     }
                 default:
                     {
-                        throw new PSArgumentException("Bad parameter set name.");
+                        throw new PSArgumentException($"Bad parameter set name: {this.ParameterSetName}");
                     }
             }
         }

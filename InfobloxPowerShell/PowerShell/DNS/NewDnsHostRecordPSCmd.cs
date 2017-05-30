@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxObjects.DNS;
 using BAMCIS.Infoblox.PowerShell.Generic;
 using System;
@@ -197,7 +197,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
             {
                 if (!String.IsNullOrEmpty(value))
                 {
-                    NetworkAddressTest.IsFqdnWithException(value, "HostName", out this._HostName);
+                    NetworkAddressTest.IsFqdn(value, "HostName", out this._HostName, false, true);
                 }
                 else
                 {
@@ -431,7 +431,8 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
             }
             else
             {
-                if (this.InputObject == null)
+                
+                if (this.InputObject == null )
                 {
                     RuntimeDefinedParameter mac = IBXDynamicParameters.MAC();
                     base.ParameterDictionary.Add(mac.Name, mac);
@@ -516,6 +517,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
             try
             {
                 base.Response = base.IBX.NewDnsHostRecord(this._HostName, this._IPAddress, this._AddToDns, this._DHCP, this._SetHostName, this._MAC).Result;
+                base.FinishResponse(this.PassThru);
             }
             catch (AggregateException ae)
             {
@@ -543,6 +545,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
             try
             {
                 base.Response = base.IBX.NewDnsHostRecordWithNextAvailableIP(this._HostName, this._Network, this._AddToDns, this._DHCP, this._SetHostName, this._MAC).Result;
+                base.FinishResponse(this.PassThru);
             }
             catch (AggregateException ae)
             {

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Net.Http;
-using Newtonsoft.Json;
-using System.Net;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 
 namespace BAMCIS.Infoblox.Errors
 {
@@ -18,27 +18,34 @@ namespace BAMCIS.Infoblox.Errors
 
         public InfobloxCustomException(HttpResponseMessage response)
         {
-            string Temp = response.Content.ReadAsStringAsync().Result;
-
-            try
+            if (response != null)
             {
-                InfobloxError error = JsonConvert.DeserializeObject<InfobloxError>(Temp);
+                string Temp = response.Content.ReadAsStringAsync().Result;
 
-                this._message = error.text;
-                this.Error = error.Error.Trim('\r').Trim('\n').Trim('\r');
-                this.Text = error.text;
-                this.Source = error.code;
+                try
+                {
+                    InfobloxError error = JsonConvert.DeserializeObject<InfobloxError>(Temp);
+
+                    this._message = error.text;
+                    this.Error = error.Error.Trim('\r').Trim('\n').Trim('\r');
+                    this.Text = error.text;
+                    this.Source = error.code;
+                }
+                catch (Exception)
+                {
+                    this._message = Temp;
+                    this.Text = Temp;
+                    this.Error = Temp;
+                }
+
+                this.HttpResponseCode = (int)response.StatusCode;
+                this.HttpStatus = response.StatusCode.ToString();
+                this.HttpErrorReason = response.ReasonPhrase;
             }
-            catch (Exception)
+            else
             {
-                this._message = Temp;
-                this.Text = Temp;
-                this.Error = Temp;
+                throw new ArgumentNullException("response", "The HttpResponseMessage used to create a CustomInfobloxException cannot be null.");
             }
-
-            this.HttpResponseCode = (int)response.StatusCode;
-            this.HttpStatus = response.StatusCode.ToString();
-            this.HttpErrorReason = response.ReasonPhrase;
         }
 
         public InfobloxCustomException(WebException e)
@@ -79,23 +86,37 @@ namespace BAMCIS.Infoblox.Errors
             }
             else
             {
-                throw new ArgumentNullException("e", "The WebException parameter cannot be null.");
+                throw new ArgumentNullException("e", "The WebException used to create a CustomInfobloxException cannot be null.");
             }
         }
 
         public InfobloxCustomException(Exception e)
         {
-            this._message = e.Message;
-            this.Text = e.Message;
-            this.Error = e.HResult.ToString();
-            this.HttpErrorReason = e.Message;
-            this.HttpResponseCode = 0;
-            this.HttpStatus = e.GetType().FullName;
+            if (e != null)
+            {
+                this._message = e.Message;
+                this.Text = e.Message;
+                this.Error = e.HResult.ToString();
+                this.HttpErrorReason = e.Message;
+                this.HttpResponseCode = 0;
+                this.HttpStatus = e.GetType().FullName;
+            }
+            else
+            {
+                throw new ArgumentNullException("e", "The Exception used to create a CustomInfobloxException cannot be null.");
+            }
         }
 
-        public InfobloxCustomException(string Message)
+        public InfobloxCustomException(string message)
         {
-            this._message = Message;
+            if (!String.IsNullOrEmpty(message))
+            {
+                this._message = message;
+            }
+            else
+            {
+                throw new ArgumentNullException("message", "The message cannot be null or empty.");
+            }
         }
 
         public override string Message

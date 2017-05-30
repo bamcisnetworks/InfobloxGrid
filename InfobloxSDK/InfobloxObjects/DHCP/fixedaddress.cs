@@ -1,7 +1,7 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -57,7 +57,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             set
             {
                 IPAddress ip;
-                if (NetworkAddressTest.isIPv4(value, out ip))
+                if (NetworkAddressTest.IsIPv4Address(value, out ip))
                 {
                     this._bootserver = ip.ToString();
                 }
@@ -80,7 +80,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "ddns_domainname", out this._ddns_domainname);
+                NetworkAddressTest.IsFqdn(value, "ddns_domainname", out this._ddns_domainname, true, true);
             }
         }
         public string ddns_hostname 

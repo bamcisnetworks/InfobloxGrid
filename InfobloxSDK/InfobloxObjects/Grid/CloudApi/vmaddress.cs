@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using System;
 using System.Net;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
             }
             internal protected set
             {
-                NetworkAddressTest.isIPWithException(value, out this._address);
+                NetworkAddressTest.IsIPAddress(value, out this._address, false, true);
             }
         }
         public object[] associated_objects 
@@ -58,7 +58,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
                 foreach (string item in value)
                 {
                     string temp = String.Empty;
-                    NetworkAddressTest.IsFqdnWithException(item, "dns_names", out temp);
+                    NetworkAddressTest.IsFqdn(item, "dns_names", out temp, false, true);
                     this._dns_names.Add(temp);
                 }
             }
@@ -85,7 +85,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
             }
             internal protected set
             {
-                NetworkAddressTest.IsMACWithExceptionAllowEmpty(value, out this._mac_address);
+                NetworkAddressTest.IsMAC(value, out this._mac_address, true, true);
             }
         }
         [ReadOnlyAttribute]
@@ -97,7 +97,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
             }
             internal protected set
             {
-                NetworkAddressTest.IsIPv4CidrWithExceptionAllowEmpty(value, out this._network);
+                NetworkAddressTest.IsIPv4Cidr(value, out this._network, true, true);
             }
         }
         [ReadOnlyAttribute]

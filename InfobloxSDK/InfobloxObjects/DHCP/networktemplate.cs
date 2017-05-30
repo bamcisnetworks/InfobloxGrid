@@ -1,7 +1,7 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Setting.Ipam;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Setting.Ipam;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -39,7 +39,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 if (!String.IsNullOrEmpty(value))
                 {
                     IPAddress ip;
-                    if (NetworkAddressTest.isIPv4(value, out ip))
+                    if (NetworkAddressTest.IsIPv4Address(value, out ip))
                     {
                         this._bootfile = ip.ToString();
                     }
@@ -69,7 +69,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 if (!String.IsNullOrEmpty(value))
                 {
                     IPAddress ip;
-                    if (NetworkAddressTest.isIPv4(value, out ip))
+                    if (NetworkAddressTest.IsIPv4Address(value, out ip))
                     {
                         this._bootserver = ip.ToString();
                     }
@@ -97,7 +97,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "ddns_domainname", out this._ddns_domainname);
+                NetworkAddressTest.IsFqdn(value, "ddns_domainname", out this._ddns_domainname, true, true);
             }
         }
         public bool ddns_generate_hostname { get; set; }
@@ -119,7 +119,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 foreach (string email in value)
                 {
                     string temp = String.Empty;
-                    NetworkAddressTest.IsValidEmailWithException(email, out temp);
+                    NetworkAddressTest.IsValidEmail(email, out temp, false, true);
                     this._email_list.Add(temp);
                 }
             }
@@ -186,7 +186,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 foreach (string email in value)
                 {
                     string temp = String.Empty;
-                    NetworkAddressTest.IsValidEmailWithException(email, out temp);
+                    NetworkAddressTest.IsValidEmail(email, out temp, false, true);
                     this._ipam_email_addresses.Add(temp);
                 }
             }
@@ -295,7 +295,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 if (!String.IsNullOrEmpty(value))
                 {
                     IPAddress ip;
-                    if (NetworkAddressTest.isIPv4(value, out ip))
+                    if (NetworkAddressTest.IsIPv4Address(value, out ip))
                     {
                         this._nextserver = ip.ToString();
                     }

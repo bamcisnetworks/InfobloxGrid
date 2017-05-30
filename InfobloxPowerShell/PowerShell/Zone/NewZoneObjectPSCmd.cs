@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxMethods;
 using BAMCIS.Infoblox.PowerShell.Generic;
 using System;

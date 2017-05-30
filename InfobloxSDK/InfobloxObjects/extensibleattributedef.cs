@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
 using System;
 
 namespace BAMCIS.Infoblox.InfobloxObjects

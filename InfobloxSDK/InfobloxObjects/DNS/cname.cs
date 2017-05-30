@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.DNS
 {
@@ -19,7 +19,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "canonical", out this._canonical);
+                NetworkAddressTest.IsFqdn(value, "canonical", out this._canonical, false, true);
             }
         }
         [ReadOnlyAttribute]
@@ -31,7 +31,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "dns_canonical", out this._dns_canonical);
+                NetworkAddressTest.IsFqdn(value, "dns_canonical", out this._dns_canonical, false, true);
             }
         }
 

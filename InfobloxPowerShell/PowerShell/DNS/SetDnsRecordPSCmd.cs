@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxMethods;
 using BAMCIS.Infoblox.PowerShell.Generic;
 using System;
@@ -240,23 +240,6 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
         }
 
         [Parameter(
-            Mandatory = false,
-            ParameterSetName = BaseIbxObjectPSCmd._GRID_BY_ATTRIBUTE,
-            HelpMessage = "Set to define the new record by attributes."
-        )]
-        [Parameter(
-            Mandatory = false,
-            ParameterSetName = BaseIbxObjectPSCmd._SESSION_BY_ATTRIBUTE,
-            HelpMessage = "Set to define the new record by attributes."
-        )]
-        [Parameter(
-            Mandatory = false,
-            ParameterSetName = BaseIbxObjectPSCmd._ENTERED_SESSION_BY_ATTRIBUTE,
-            HelpMessage = "Set to define the new record by attributes."
-        )]
-        public SwitchParameter ByAttribute { get; set; }
-
-        [Parameter(
             Mandatory = true,
             ValueFromPipeline = true,
             ParameterSetName = BaseIbxObjectPSCmd._GRID_BY_OBJECT,
@@ -284,19 +267,19 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
             {
                 if (value != null)
                 {
-                    Type type;
+                    Type ObjectType;
                     if (value.GetType() == typeof(PSObject))
                     {
-                        PSObject obj = (PSObject)value;
-                        type = obj.BaseObject.GetType();
-                        value = typeof(PSExtensionMethods).GetMethod("ConvertPSObject").MakeGenericMethod(type).Invoke(typeof(PSExtensionMethods), new object[] { obj });
+                        PSObject PSObj = (PSObject)value;
+                        ObjectType = PSObj.BaseObject.GetType();
+                        value = typeof(PSExtensionMethods).GetMethod("ConvertPSObject").MakeGenericMethod(ObjectType).Invoke(typeof(PSExtensionMethods), new object[] { PSObj });
                     }
                     else
                     {
-                        type = value.GetType();
+                        ObjectType = value.GetType();
                     }
 
-                    if (type.IsInfobloxDnsRecordType())
+                    if (ObjectType.IsInfobloxDnsRecordType())
                     {
                         this._InputObject = value;
                     }
@@ -366,8 +349,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
                                 base.ParameterDictionary.Add(Param.Name, Param);
                             }
                         }
-
-                        if (this.InputObject == null && !this.NextAvailableIp)
+                        else
                         {
                             foreach (RuntimeDefinedParameter Param in IBXDynamicParameters.ObjectTypeProperties(base.ObjectType, new string[] { _GRID_BY_ATTRIBUTE, _SESSION_BY_ATTRIBUTE, _ENTERED_SESSION_BY_ATTRIBUTE }))
                             {

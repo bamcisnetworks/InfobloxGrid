@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using System;
 using System.IO;
 using System.Management.Automation;
@@ -167,9 +167,9 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
         protected override void ProcessRecord()
         {
             //Use base._Ref since the user can provide an input object that sets it
-            if (base._Force == true || ShouldProcess($"{base._Ref}", $"Delete"))
+            if (base.Force == true || ShouldProcess($"{base._Ref}", $"Delete"))
             {
-                if (base._Force == true || ShouldContinue($"Do you want to delete the IBX Object {base._Ref}?", "Deleting IBX Object"))
+                if (base.Force == true || ShouldContinue($"Do you want to delete the IBX Object {base._Ref}?", "Deleting IBX Object"))
                 {
                     StringWriter SWriter = new StringWriter();
                     TextWriter OriginalOut = Console.Out;

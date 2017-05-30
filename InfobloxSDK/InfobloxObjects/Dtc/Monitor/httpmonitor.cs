@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.Enums;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.Enums;
 using System;
 using System.Linq;
 using System.Net;

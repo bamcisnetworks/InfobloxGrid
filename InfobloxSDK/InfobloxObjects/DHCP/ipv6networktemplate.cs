@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -68,7 +68,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "domain_name", out this._domain_name);
+                NetworkAddressTest.IsFqdn(value, "domain_name", out this._domain_name, true, true);
             }
         }
         public string[] domain_name_servers
@@ -85,7 +85,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                     foreach (string val in value)
                     {
                         IPAddress ip;
-                        if (NetworkAddressTest.isIPv6(val, out ip))
+                        if (NetworkAddressTest.IsIPv6Address(val, out ip))
                         {
                             this._domain_name_servers.Add(ip.ToString());
                         }
@@ -111,7 +111,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 if (!String.IsNullOrEmpty(value))
                 {
                     IPAddress ip;
-                    if (NetworkAddressTest.isIPv6(value, out ip))
+                    if (NetworkAddressTest.IsIPv6Address(value, out ip))
                     {
                         this._ipv6prefix = ip.ToString();
                     }

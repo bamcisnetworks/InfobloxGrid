@@ -1,10 +1,10 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Discovery;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Grid.CloudApi;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Properties;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Discovery;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Grid.CloudApi;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Properties;
 using System;
 using System.Net;
 using System.Net.Sockets;

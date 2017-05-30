@@ -1,5 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
 {
@@ -23,7 +24,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
             }
             internal protected set
             {
-                NetworkAddressTest.isIPv4WithExceptionAllowEmpty(value, out this._ip_address);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv4Address(value, out IP, true, true))
+                {
+                    this._ip_address = IP.ToString();
+                }
             }
         }
         [ReadOnlyAttribute]
@@ -38,7 +43,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
             }
             internal protected set
             {
-                NetworkAddressTest.IsMACWithExceptionAllowEmpty(value, out this._mac_address);
+                NetworkAddressTest.IsMAC(value, out this._mac_address, true, true);
             }
         }
         [ReadOnlyAttribute]
@@ -51,7 +56,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
             }
             internal protected set
             {
-                NetworkAddressTest.IsIPv4CidrWithExceptionAllowEmpty(value, out this._network);
+                NetworkAddressTest.IsIPv4Cidr(value, out this._network, true, true);
             }
         }
         [ReadOnlyAttribute]

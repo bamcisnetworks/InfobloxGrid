@@ -1,8 +1,8 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Setting.Ipam;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Setting.Ipam;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +48,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                     {
                         this._bootserver = value;
                     }
-                    else if (NetworkAddressTest.isIPv4(value, out ip) || NetworkAddressTest.isIPv6(value, out ip))
+                    else if (NetworkAddressTest.IsIPv4Address(value, out ip) || NetworkAddressTest.IsIPv6Address(value, out ip, false))
                     {
                         this._bootserver = ip.ToString();
                     }
@@ -77,7 +77,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 foreach (string email in value)
                 {
                     string temp = String.Empty;
-                    NetworkAddressTest.IsValidEmailWithException(email, out temp);
+                    NetworkAddressTest.IsValidEmail(email, out temp, false, true);
                     this._email_list.Add(temp);
                 }
             }
@@ -167,7 +167,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 foreach (string email in value)
                 {
                     string temp = String.Empty;
-                    NetworkAddressTest.IsValidEmailWithException(email, out temp);
+                    NetworkAddressTest.IsValidEmail(email, out temp, false, true);
                     this._ipam_email_addresses.Add(email);
                 }
             }
@@ -349,7 +349,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 {
                     this._nextserver = value;
                 }
-                else if (NetworkAddressTest.isIPv4(value, out ip))
+                else if (NetworkAddressTest.IsIPv4Address(value, out ip))
                 {
                     this._nextserver = ip.ToString();
                 }

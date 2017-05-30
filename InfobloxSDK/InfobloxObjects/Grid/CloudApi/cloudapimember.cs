@@ -1,7 +1,7 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Grid.CloudApi;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Grid.CloudApi;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
 {

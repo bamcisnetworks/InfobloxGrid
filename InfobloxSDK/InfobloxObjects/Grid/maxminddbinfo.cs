@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using System;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.Grid

@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxMethods;
 using System;
 using System.Collections.Generic;
@@ -24,11 +24,11 @@ namespace BAMCIS.Infoblox.PowerShell
         /// Generates a Network parameter
         /// </summary>
         /// <returns></returns>
-        internal static RuntimeDefinedParameter Network()
+        internal static RuntimeDefinedParameter Network(bool required = false)
         {
             ParameterAttribute Attr = new ParameterAttribute()
             {
-                Mandatory = true,
+                Mandatory = required,
                 HelpMessage = "Specify the network the next available IP should come from, in FQDN/CIDR notation, like 192.168.0.1/24."
             };
 
@@ -227,7 +227,7 @@ namespace BAMCIS.Infoblox.PowerShell
         /// </summary>
         /// <param name="required">Specifies if this parameter is mandatory</param>
         /// <returns></returns>
-        public static RuntimeDefinedParameter ZoneType(bool required = false)
+        internal static RuntimeDefinedParameter ZoneType(bool required = false)
         {
             RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
@@ -253,7 +253,7 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <param name="parameterSetName">The name of the parameter set these parameters will be part of</param>
         /// <param name="required">Specifies if these parameters are mandatory</param>
         /// <returns></returns>
-        public static IEnumerable<RuntimeDefinedParameter> ObjectTypeProperties(InfoBloxObjectsEnum objectType, IEnumerable<string> parameterSets)
+        internal static IEnumerable<RuntimeDefinedParameter> ObjectTypeProperties(InfoBloxObjectsEnum objectType, IEnumerable<string> parameterSets)
         {
             PropertyInfo[] PropInfo = objectType.GetObjectType().GetTypeInfo().GetProperties().Where(x => x.GetCustomAttribute<ReadOnlyAttribute>() == null && x.Name != "_ref").ToArray();
 
@@ -305,9 +305,9 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <param name="objectType">The type of object to get the properties of</param>
         /// <param name="required">Specifies if these parameters are mandatory</param>
         /// <returns></returns>
-        public static IEnumerable<RuntimeDefinedParameter> ObjectTypeProperties(InfoBloxObjectsEnum ObjectType)
+        internal static IEnumerable<RuntimeDefinedParameter> ObjectTypeProperties(InfoBloxObjectsEnum objectType)
         {
-            return ObjectTypeProperties(ObjectType, new string[] { ParameterAttribute.AllParameterSets });
+            return ObjectTypeProperties(objectType, new string[] { ParameterAttribute.AllParameterSets });
         }
 
         /// <summary>
@@ -317,7 +317,7 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <param name="ibxObject">The object whose properties will be enumerated to determine which can be searched on</param>
         /// <param name="required">Specifies if these parameters are mandatory</param>
         /// <returns></returns>
-        public static RuntimeDefinedParameter SearchField(InfoBloxObjectsEnum ibxObject, bool required = false)
+        internal static RuntimeDefinedParameter SearchField(InfoBloxObjectsEnum ibxObject, bool required = false)
         {
             //*** Build the list of properties that can be searched for an object
 
@@ -349,40 +349,102 @@ namespace BAMCIS.Infoblox.PowerShell
         /// <param name="searchField">The field (property) to be searched</param>
         /// <param name="required">Specifies if these parameters are mandatory</param>
         /// <returns></returns>
-        public static RuntimeDefinedParameter SearchType(Type objectType, string searchField, bool required = false)
+        internal static RuntimeDefinedParameter SearchType(Type objectType, string searchField, bool required = false)
         {
+            if (objectType != null)
+            {
+                if (!String.IsNullOrEmpty(searchField))
+                {
+                    RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
+                    {
+                        Name = "SearchType",
+                        ParameterType = typeof(String)
+                    };
+
+                    foreach (string Set in _PARAMETER_SETS)
+                    {
+                        Param.Attributes.Add(new ParameterAttribute()
+                        {
+                            ParameterSetName = Set,
+                            Mandatory = required,
+                            HelpMessage = "Select the type of search you want to perform."
+                        });
+                    }
+
+
+                    SearchableAttribute Search = objectType.GetProperty(searchField).GetCustomAttribute<SearchableAttribute>();
+
+                    List<string> SearchesAllowed = new List<string>();
+
+                    if (Search != null)
+                    {
+                        foreach (PropertyInfo Prop in Search.GetType().GetProperties())
+                        {
+                            if (Prop.PropertyType.Equals(typeof(bool)))
+                            {
+                                if ((bool)Prop.GetValue(Search) == true)
+                                {
+                                    SearchesAllowed.Add(Prop.Name);
+                                }
+                            }
+                        }
+                    }
+
+                    Param.Attributes.Add(new ValidateSetAttribute(SearchesAllowed.ToArray()));
+
+                    return Param;
+                }
+                else
+                {
+                    throw new ArgumentNullException("searchField", "The search field cannot be null or empty.");
+                }
+            }
+            else
+            {
+                throw new ArgumentNullException("objectType", "The object type cannot be null");
+            }
+        }
+
+        internal static RuntimeDefinedParameter FieldsToReturn(InfoBloxObjectsEnum objectType, IEnumerable<string> parameterSets, bool required = false)
+        {
+            IEnumerable<string> FieldsToReturn = objectType.GetObjectType().GetTypeInfo().GetProperties().Where(x => !x.IsAttributeDefined<NotReadableAttribute>() && x.Name != "_ref").Select(x => x.Name);
+
+            FieldsToReturn = RefObject.RemoveRefProperty(FieldsToReturn);
+
+            List<string> Temp = FieldsToReturn.ToList();
+
+            Temp.AddRange(new string[] { "ALL", "BASIC" });
+
+            FieldsToReturn = Temp;
+
             RuntimeDefinedParameter Param = new RuntimeDefinedParameter()
             {
-                Name = "SearchType",
-                ParameterType = typeof(String)
+                Name = "FieldsToReturn",
+                ParameterType = typeof(string[])
             };
 
-            foreach (string Set in _PARAMETER_SETS)
+            if (parameterSets != null && parameterSets.Any())
+            {
+                foreach (string Set in parameterSets)
+                {
+                    Param.Attributes.Add(new ParameterAttribute()
+                    {
+                        ParameterSetName = Set,
+                        Mandatory = required,
+                        HelpMessage = "Specify the fields to return."
+                    });
+                }
+            }
+            else
             {
                 Param.Attributes.Add(new ParameterAttribute()
                 {
-                    ParameterSetName = Set,
                     Mandatory = required,
-                    HelpMessage = "Select the type of search you want to perform."
+                    HelpMessage = "Specify the fields to return."
                 });
             }
 
-            SearchableAttribute Search = objectType.GetProperty(searchField).GetCustomAttribute<SearchableAttribute>();
-
-            List<string> SearchesAllowed = new List<string>();
-
-            foreach (PropertyInfo Prop in Search.GetType().GetProperties())
-            {
-                if (Prop.PropertyType.Equals(typeof(bool)))
-                {
-                    if ((bool)Prop.GetValue(Search) == true)
-                    {
-                        SearchesAllowed.Add(Prop.Name);
-                    }
-                }
-            }
-
-            Param.Attributes.Add(new ValidateSetAttribute(SearchesAllowed.ToArray()));
+            Param.Attributes.Add(new ValidateSetAttribute(FieldsToReturn.ToArray()));
 
             return Param;
         }

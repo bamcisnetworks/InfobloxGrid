@@ -1,9 +1,9 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Grid.CloudApi;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Setting;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Grid.CloudApi;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Setting;
 using BAMCIS.Infoblox.InfobloxObjects.DHCP;
 using System;
 using System.Collections.Generic;
@@ -93,7 +93,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             internal protected set
             {
-                NetworkAddressTest.IsValidEmailWithException(value, out this._dns_soa_email);
+                NetworkAddressTest.IsValidEmail(value, out this._dns_soa_email, false, true);
             }
         }
         public dnsseckeyparams dnssec_key_params { get; set; }
@@ -155,7 +155,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             set
             {
-                NetworkAddressTest.isIPWithException(value, out this._import_from);
+                NetworkAddressTest.IsIPAddress(value, out this._import_from, false, true);
             }
         }
         [ReadOnlyAttribute]
@@ -266,7 +266,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             set
             {
-                NetworkAddressTest.IsValidEmailWithException(value, out this._soa_email, true);
+                NetworkAddressTest.IsValidEmail(value, out this._soa_email, true, true);
             }
         }
         public uint soa_expire { get; set; }

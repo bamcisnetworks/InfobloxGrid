@@ -1,15 +1,15 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Errors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Http;
-using BAMCIS.Infoblox.Errors;
-using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxMethods
 {
@@ -89,11 +89,11 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public async Task<IEnumerable<T>> SearchIbxObject<T>(SearchType searchType, string searchField, string value)
+        public async Task<IEnumerable<T>> SearchIbxObject<T>(SearchType searchType, string searchField, string value, IEnumerable<string> fieldsToReturn)
         {
-            if (ExtensionMethods.IsInfobloxType<T>())
+            if (InfobloxSDKExtensionMethods.IsInfobloxType<T>())
             {
-                return await this.SearchAsync<T>(CommandHelpers.BuildGetSearchRequest<T>(searchType, searchField, value));
+                return await this.SearchAsync<T>(CommandHelpers.BuildGetSearchRequest<T>(searchType, searchField, value, fieldsToReturn));
             }
             else
             {
@@ -101,13 +101,13 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             }
         }
 
-        public async Task<T> GetIbxObject<T>(string reference)
+        public async Task<T> GetIbxObject<T>(string reference, IEnumerable<string> fieldsToReturn)
         {
-            if (ExtensionMethods.IsInfobloxType<T>())
+            if (InfobloxSDKExtensionMethods.IsInfobloxType<T>())
             {
                 if (!String.IsNullOrEmpty(reference))
                 {
-                    return await this.GetAsync<T>(CommandHelpers.BuildGetRequest<T>(reference));
+                    return await this.GetAsync<T>(CommandHelpers.BuildGetRequest<T>(reference, fieldsToReturn));
                 }
                 else
                 {
@@ -143,9 +143,9 @@ namespace BAMCIS.Infoblox.InfobloxMethods
         {
             if (ibxObject != null)
             {
-                if (ExtensionMethods.IsInfobloxType(ibxObject.GetType()))
+                if (InfobloxSDKExtensionMethods.IsInfobloxType(ibxObject.GetType()))
                 {
-                    return await this.PostAsync(ExtensionMethods.GetNameAttribute(ibxObject), ExtensionMethods.PrepareObjectForSend(ibxObject));
+                    return await this.PostAsync(InfobloxSDKExtensionMethods.GetNameAttribute(ibxObject), InfobloxSDKExtensionMethods.PrepareObjectForSend(ibxObject, true));
                 }
                 else
                 {
@@ -164,7 +164,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
             {
                 if (args.Any())
                 {
-                    return await this.PostAsync(type.GetNameAttribute(), ExtensionMethods.PrepareArgsForSend(type, args));
+                    return await this.PostAsync(type.GetNameAttribute(), InfobloxSDKExtensionMethods.PrepareArgsForSend(type, args));
                 }
                 else
                 {
@@ -179,7 +179,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
         public async Task<string> UpdateIbxObject(dynamic ibxObject, bool RemoveEmpty = true)
         {
-            if (ExtensionMethods.IsInfobloxType(ibxObject.GetType()))
+            if (InfobloxSDKExtensionMethods.IsInfobloxType(ibxObject.GetType()))
             {
                 if (ibxObject != null)
                 {
@@ -191,16 +191,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
                         if (!String.IsNullOrEmpty(Reference))
                         {
-                            string Json = String.Empty;
-
-                            if (RemoveEmpty)
-                            {
-                                Json = ExtensionMethods.PrepareObjectForSend(ibxObject);
-                            }
-                            else
-                            {
-                                Json = ExtensionMethods.PrepareObjectForSendWithEmptyProperties(ibxObject);
-                            }
+                            string Json = InfobloxSDKExtensionMethods.PrepareObjectForSend(ibxObject, RemoveEmpty);
 
                             return await this.PutAsync(Reference, Json);
                         }
@@ -233,7 +224,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
                 {
                     if (!String.IsNullOrEmpty(reference))
                     {
-                        return await this.PutAsync(reference, ExtensionMethods.PrepareArgsForSend(type, args));
+                        return await this.PutAsync(reference, InfobloxSDKExtensionMethods.PrepareArgsForSend(type, args));
                     }
                     else
                     {
@@ -254,7 +245,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
         public async Task<string> UpdateIbxObject<T>(T ibxObject, bool RemoveEmpty = true) where T : RefObject
         {
-            if (ExtensionMethods.IsInfobloxType<T>())
+            if (InfobloxSDKExtensionMethods.IsInfobloxType<T>())
             {
                 if (ibxObject != null)
                 {
@@ -266,18 +257,9 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
                         if (!String.IsNullOrEmpty(reference))
                         {
-                            string json = String.Empty;
-
-                            if (RemoveEmpty)
-                            {
-                                json = ExtensionMethods.PrepareObjectForSend(ibxObject);
-                            }
-                            else
-                            {
-                                json = ExtensionMethods.PrepareObjectForSendWithEmptyProperties(ibxObject);
-                            }
-
-                            return await this.PutAsync(reference, json);
+                            string Json = InfobloxSDKExtensionMethods.PrepareObjectForSend(ibxObject, RemoveEmpty);
+ 
+                            return await this.PutAsync(reference, Json);
                         }
                         else
                         {
@@ -302,7 +284,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
         public async Task<string> UpdateIbxObject<T>(string url, string data)
         {
-            if (ExtensionMethods.IsInfobloxType<T>())
+            if (InfobloxSDKExtensionMethods.IsInfobloxType<T>())
             {
                 if (!String.IsNullOrEmpty(data))
                 {
@@ -561,7 +543,7 @@ namespace BAMCIS.Infoblox.InfobloxMethods
 
         public static IEnumerable<InfoBloxObjectsEnum> GetDhcpRecordTypes()
         {
-            return Enum.GetValues(typeof(InfoBloxObjectsEnum)).Cast<InfoBloxObjectsEnum>().Where(x => x.GetObjectType() != null && (typeof(ExtensionMethods).GetTypeInfo().Assembly.GetTypes().Where(y => y.Namespace != null && y.Namespace.Equals("BAMCIS.Infoblox.InfobloxObjects.DHCP"))).Contains(x.GetObjectType()));
+            return Enum.GetValues(typeof(InfoBloxObjectsEnum)).Cast<InfoBloxObjectsEnum>().Where(x => x.GetObjectType() != null && (typeof(InfobloxSDKExtensionMethods).GetTypeInfo().Assembly.GetTypes().Where(y => y.Namespace != null && y.Namespace.Equals("BAMCIS.Infoblox.InfobloxObjects.DHCP"))).Contains(x.GetObjectType()));
         }
 
         public static IEnumerable<InfoBloxObjectsEnum> GetZoneTypes()

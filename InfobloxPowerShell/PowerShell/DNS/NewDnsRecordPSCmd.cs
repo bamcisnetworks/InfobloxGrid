@@ -1,10 +1,12 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxMethods;
 using BAMCIS.Infoblox.PowerShell.Generic;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
+using System.Reflection;
 
 namespace BAMCIS.Infoblox.PowerShell.DNS
 {
@@ -201,7 +203,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
             }
             set
             {
-                NetworkAddressTest.IsIPv4CidrWithException(value, out this._Network);
+                NetworkAddressTest.IsIPv4Cidr(value, out this._Network, false, true);
             }
         }
 
@@ -233,25 +235,25 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
             {
                 if (value != null)
                 {
-                    Type type;
+                    Type ObjectType;
                     if (value.GetType() == typeof(PSObject))
                     {
-                        PSObject obj = (PSObject)value;
-                        type = obj.BaseObject.GetType();
-                        value = typeof(PSExtensionMethods).GetMethod("ConvertPSObject").MakeGenericMethod(type).Invoke(typeof(PSExtensionMethods), new object[] { obj });
+                        PSObject PSObj = (PSObject)value;
+                        ObjectType = PSObj.BaseObject.GetType();
+                        value = typeof(PSExtensionMethods).GetMethod("ConvertPSObject").MakeGenericMethod(ObjectType).Invoke(typeof(PSExtensionMethods), new object[] { PSObj });               
                     }
                     else
                     {
-                        type = value.GetType();
+                        ObjectType = value.GetType();
                     }
 
-                    if (type.IsInfobloxDnsRecordType())
+                    if (ObjectType.IsInfobloxDnsRecordType())
                     {
                         this._InputObject = value;
                     }
                     else
                     {
-                        throw new PSArgumentException(String.Format("The input object must be a dns record type, {0} was provided.", value.GetType().Name));
+                        throw new PSArgumentException($"The input object must be a dns record type, {value.GetType().FullName} was provided.");
                     }
                 }
                 else
@@ -269,8 +271,8 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
 
             if (this.InputObject == null)
             {
-                RuntimeDefinedParameter param = IBXDynamicParameters.RecordType(true);
-                base.ParameterDictionary.Add(param.Name, param);
+                RuntimeDefinedParameter Param = IBXDynamicParameters.RecordType(true);
+                base.ParameterDictionary.Add(Param.Name, Param);
 
                 string RecordType = this.GetUnboundValue<string>("RecordType");
 
@@ -283,17 +285,16 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
                             IEnumerable<RuntimeDefinedParameter> Temp = IBXDynamicParameters.ObjectTypeProperties(base.ObjectType);
                             string[] fieldsToRemove = new string[] { "ipv4addr", "ipv6addr" };
 
-                            foreach (RuntimeDefinedParameter Param in Temp.Except(Temp.Where(x => fieldsToRemove.Contains(x.Name))))
+                            foreach (RuntimeDefinedParameter RuntimeParam in Temp.Except(Temp.Where(x => fieldsToRemove.Contains(x.Name))))
                             {
-                                base.ParameterDictionary.Add(Param.Name, Param);
+                                base.ParameterDictionary.Add(RuntimeParam.Name, RuntimeParam);
                             }
                         }
-
-                        if (this.InputObject == null && !this.NextAvailableIp)
+                        else
                         {
-                            foreach(RuntimeDefinedParameter Param in IBXDynamicParameters.ObjectTypeProperties(base.ObjectType, new string[] { BaseIbxObjectPSCmd._GRID_BY_ATTRIBUTE, _SESSION_BY_ATTRIBUTE, _ENTERED_SESSION_BY_ATTRIBUTE }))
+                            foreach (RuntimeDefinedParameter RuntimeParam in IBXDynamicParameters.ObjectTypeProperties(base.ObjectType, new string[] { _GRID_BY_ATTRIBUTE, _SESSION_BY_ATTRIBUTE, _ENTERED_SESSION_BY_ATTRIBUTE }))
                             {
-                                base.ParameterDictionary.Add(Param.Name, Param);
+                                base.ParameterDictionary.Add(RuntimeParam.Name, RuntimeParam);
                             }
                         }
                     }
@@ -304,6 +305,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
         }
 
         #region Override Methods
+
         protected override void BeginProcessing()
         {
             base.BeginProcessing();

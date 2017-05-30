@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxObjects.DNS;
 using BAMCIS.Infoblox.PowerShell.Generic;
 using System;
@@ -228,7 +228,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
             {
                 if (!String.IsNullOrEmpty(value))
                 {
-                    NetworkAddressTest.isIPWithException(value, out this._IPAddress);
+                    NetworkAddressTest.IsIPAddress(value, out this._IPAddress, false, true);
                 }
                 else
                 {
@@ -464,7 +464,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
 
             if (this._NextAvailable)
             {
-                RuntimeDefinedParameter Network = IBXDynamicParameters.Network();
+                RuntimeDefinedParameter Network = IBXDynamicParameters.Network(true);
                 base.ParameterDictionary.Add(Network.Name, Network);
             }
 
@@ -576,7 +576,6 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
                     }
                     else if (this.ParameterSetName.EndsWith(_BY_OBJECT))
                     {
-
                         base.ProcessByUpdatedObject(this._InputObject, this.RemoveEmptyProperties);
                     }
                     else
@@ -598,6 +597,5 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
         }
 
         #endregion
-
     }
 }

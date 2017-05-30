@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
 using System;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
@@ -38,7 +38,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             internal protected set
             {
-                NetworkAddressTest.isIPWithException(value, out this._address);
+                NetworkAddressTest.IsIPAddress(value, out this._address, false, true);
             }
         }
         [ReadOnlyAttribute]
@@ -108,7 +108,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             internal protected set
             {
-                NetworkAddressTest.IsIPv6DUIDWithExceptionAllowEmpty(value, out this._ipv6_duid);
+                NetworkAddressTest.IsIPv6DUID(value, out this._ipv6_duid, true, true);
             }
         }
         [ReadOnlyAttribute]
@@ -201,7 +201,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             internal protected set
             {
-                NetworkAddressTest.isIPWithException(value, out this._served_by);
+                NetworkAddressTest.IsIPAddress(value, out this._served_by, false, true);
             }
         }
         [ReadOnlyAttribute]

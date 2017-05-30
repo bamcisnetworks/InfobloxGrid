@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
 {

@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using System;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.ADSites
@@ -22,7 +22,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.ADSites
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "ms_sync_master_name", out this._ms_sync_master_name);
+                NetworkAddressTest.IsFqdn(value, "ms_sync_master_name", out this._ms_sync_master_name, true, true);
             }
         }
         [ReadOnlyAttribute]

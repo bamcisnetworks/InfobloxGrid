@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Setting.Ipam;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Setting.Ipam;
 using System;
 using System.Collections.Generic;
 
@@ -27,7 +27,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                     foreach (string email in value)
                     {
                         string temp = String.Empty;
-                        NetworkAddressTest.IsValidEmailWithException(email, out temp);
+                        NetworkAddressTest.IsValidEmail(email, out temp, false, true);
                         this._ipam_email_addresses.Add(temp);
                     }
                 }

@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
 using System;
 using System.Collections.Generic;
 
@@ -25,7 +25,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid
                 foreach (string item in value)
                 {
                     string temp = String.Empty;
-                    NetworkAddressTest.IsMACWithException(item, out temp);
+                    NetworkAddressTest.IsMAC(item, out temp, false, true);
                     this._ignore_mac_addresses.Add(temp);
                 }
             }

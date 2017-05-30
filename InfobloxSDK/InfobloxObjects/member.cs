@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Setting;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Setting;
 
 namespace BAMCIS.Infoblox.InfobloxObjects
 {
@@ -21,7 +21,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "host_name", out this._host_name);
+                NetworkAddressTest.IsFqdn(value, "host_name", out this._host_name, true, true);
             }
         }
         [ReadOnlyAttribute]

@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
 using System;
 using System.Linq;
 
@@ -26,7 +26,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "dns_replacement", out this._dns_replacement);
+                NetworkAddressTest.IsFqdn(value, "dns_replacement", out this._dns_replacement, false, true);
             }
         }
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
@@ -125,7 +125,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "replacement", out this._replacment);
+                NetworkAddressTest.IsFqdn(value, "replacement", out this._replacment, false, true);
             }
         }
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]

@@ -1,6 +1,7 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Grid;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Grid;
+using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxObjects
 {
@@ -21,7 +22,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             set
             {
-                NetworkAddressTest.isIPv4WithExceptionAllowEmpty(value, out this._dtc_health_source_address);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv4Address(value, out IP, true, true))
+                {
+                    this._dtc_health_source_address = IP.ToString();
+                }
             }
         }
         [ReadOnlyAttribute]
@@ -34,7 +39,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "host_name", out this._host_name);
+                NetworkAddressTest.IsFqdn(value, "host_name", out this._host_name, true, true);
             }
         }
         [ReadOnlyAttribute]
@@ -47,7 +52,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             set
             {
-                NetworkAddressTest.isIPv4WithExceptionAllowEmpty(value, out this._ipv4addr);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv4Address(value, out IP, true, true))
+                {
+                    this._ipv4addr = IP.ToString();
+                }
             }
         }
         [ReadOnlyAttribute]
@@ -60,7 +69,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             set
             {
-                NetworkAddressTest.isIPv6WithExceptionAllowEmpty(value, out this._ipv6addr);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv6Address(value, out IP, true, true))
+                {
+                    this._ipv6addr = IP.ToString();
+                }
             }
         }
         public loggingcategories logging_categories { get; set; }

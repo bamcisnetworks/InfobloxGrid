@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxObjects.Grid;
 using BAMCIS.Infoblox.PowerShell.Generic;
 using System.Management.Automation;
@@ -111,7 +111,7 @@ namespace BAMCIS.Infoblox.PowerShell.Grid
 
         protected override void ProcessRecord()
         {
-            WriteObject(base.IBX.GetIbxObject<grid>("grid").Result);
+            WriteObject(base.IBX.GetIbxObject<grid>("grid", new string[] { "ALL" }).Result);
         }
 
         protected override void EndProcessing()

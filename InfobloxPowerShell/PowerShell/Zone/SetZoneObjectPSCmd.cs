@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxMethods;
 using BAMCIS.Infoblox.PowerShell.Generic;
 using System;
@@ -188,7 +188,7 @@ namespace BAMCIS.Infoblox.PowerShell.Zone
                             }
                         default:
                             {
-                                throw new PSArgumentException("Bad parameter set name.");
+                                throw new PSArgumentException($"Bad parameter set name {this.ParameterSetName}.");
                             }
                     }
                 }

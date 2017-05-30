@@ -1,10 +1,9 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
-using System.Net;
 
 namespace BAMCIS.Infoblox.PowerShell.DNS
 {
@@ -157,7 +156,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
                     foreach (string ip in value)
                     {
                         string temp = String.Empty;
-                        NetworkAddressTest.isIPWithException(ip, out temp);
+                        NetworkAddressTest.IsIPAddress(ip, out temp, false, true);
                         this._IPs.Add(temp);
                     }
                 }

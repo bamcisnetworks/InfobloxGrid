@@ -1,8 +1,9 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
 using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxObjects
 {
@@ -24,7 +25,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "host_name", out this._host_name);
+                NetworkAddressTest.IsFqdn(value, "host_name", out this._host_name, true, true);
             }
         }
         public IgnoreIdEnum ignore_id { get; set; }
@@ -40,7 +41,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 foreach (string item in value)
                 {
                     string temp = String.Empty;
-                    NetworkAddressTest.IsMACWithException(item, out temp);
+                    NetworkAddressTest.IsMAC(item, out temp, false, true);
                     this._ignore_mac_addresses.Add(temp);
                 }
             }
@@ -55,7 +56,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             internal protected set
             {
-                NetworkAddressTest.isIPv4WithExceptionAllowEmpty(value, out this._ipv4addr);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv4Address(value, out IP, true, true))
+                {
+                    this._ipv4addr = IP.ToString();
+                }
             }
         }
         [ReadOnlyAttribute]
@@ -68,7 +73,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             set
             {
-                NetworkAddressTest.isIPv6WithExceptionAllowEmpty(value, out this._ipv6addr);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv6Address(value, out IP, true, true))
+                {
+                    this._ipv6addr = IP.ToString();
+                }
             }
         }
         public dhcpoption[] options { get; set; }

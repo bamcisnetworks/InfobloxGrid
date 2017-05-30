@@ -1,8 +1,8 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using Newtonsoft.Json;
 using System.Management.Automation;
 
-namespace BAMCIS.Infoblox.PowerShell.PowerShell.Generic
+namespace BAMCIS.Infoblox.PowerShell.Generic
 {
     [Cmdlet(
         VerbsCommon.Get,

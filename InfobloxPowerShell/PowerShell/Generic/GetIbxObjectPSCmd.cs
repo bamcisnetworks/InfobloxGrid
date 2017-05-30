@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxMethods;
 using System;
 using System.Collections.Generic;
@@ -191,6 +191,9 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                     {
                         RuntimeDefinedParameter SearchFields = IBXDynamicParameters.SearchField(base.ObjectType, true);
                         base.ParameterDictionary.Add(SearchFields.Name, SearchFields);
+
+                        RuntimeDefinedParameter FieldsToReturn = IBXDynamicParameters.FieldsToReturn(base.ObjectType, null, false);
+                        base.ParameterDictionary.Add(FieldsToReturn.Name, FieldsToReturn);
                     }
                 }
 
@@ -216,6 +219,15 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
         protected override void ProcessRecord()
         {
+            if (base.ParameterDictionary.ContainsKey("FieldsToReturn"))
+            {
+                base._FieldsToReturn = base.ParameterDictionary["FieldsToReturn"].Value as string[];
+            }
+            else
+            {
+                base._FieldsToReturn = new string[] { };
+            }
+
             if (this.ParameterSetName.EndsWith(_REFERENCE))
             {
                 this.ProcessByReference();
@@ -268,7 +280,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
                     try
                     {
-                        base.ObjectResponse = typeof(IBXCommonMethods).GetMethod("GetIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).InvokeGenericAsync(base.IBX, new object[] { base._Ref }).Result;
+                        base.ObjectResponse = typeof(IBXCommonMethods).GetMethod("GetIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).InvokeGenericAsync(base.IBX, new object[] { base._Ref, base._FieldsToReturn }).Result;
                     }
                     catch (AggregateException ae)
                     {
@@ -352,7 +364,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
             try
             {
-                base.ObjectResponse = (IEnumerable<object>)typeof(IBXCommonMethods).GetMethod("SearchIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).InvokeGenericAsync(base.IBX, new object[] { this._searchType, this._SearchField, this.SearchValue }).Result;
+                base.ObjectResponse = (IEnumerable<object>)typeof(IBXCommonMethods).GetMethod("SearchIbxObject").MakeGenericMethod(base.ObjectType.GetObjectType()).InvokeGenericAsync(base.IBX, new object[] { this._searchType, this._SearchField, this.SearchValue, base._FieldsToReturn }).Result;
             }
             catch (AggregateException ae)
             {

@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using System;
 using System.IO;
 using System.Linq;
@@ -434,7 +434,7 @@ namespace BAMCIS.Infoblox.PowerShell.DNS
                     }
                     else
                     {
-                        throw new PSArgumentException("Bad ParameterSet Name");
+                        throw new PSArgumentException($"Bad ParameterSet Name: {this.ParameterSetName}");
                     }
                 }
             }

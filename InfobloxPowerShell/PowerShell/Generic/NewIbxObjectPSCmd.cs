@@ -1,7 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.InfobloxMethods;
 using System;
-using System.IO;
 using System.Management.Automation;
 
 namespace BAMCIS.Infoblox.PowerShell.Generic

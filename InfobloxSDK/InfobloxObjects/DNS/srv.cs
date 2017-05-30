@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
 using System;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.DNS
@@ -22,7 +22,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "dns_target", out this._dns_target);
+                NetworkAddressTest.IsFqdn(value, "dns_target", out this._dns_target, false, true);
             }
         }
         [Required]
@@ -75,7 +75,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "target", out this._target);
+                NetworkAddressTest.IsFqdn(value, "target", out this._target, false, true);
             }
         }
         [Required]

@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Grid;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Grid;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.Grid
 {

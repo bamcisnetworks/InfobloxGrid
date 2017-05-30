@@ -1,7 +1,8 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
 using System;
+using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.DNS
 {
@@ -35,7 +36,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.IsIPv4OrFqdnWithExceptionAllowEmpty(value, "bootserver", out this._bootserver);
+                NetworkAddressTest.IsIPv4AddressOrFQDN(value, "bootserver", out this._bootserver, true, true);
             }
         }
         public bool deny_bootp { get; set; }
@@ -51,7 +52,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.isIPv4WithException(value, out this._ipv4addr);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv4Address(value, out IP, false, true))
+                {
+                    this._ipv4addr = IP.ToString();
+                }
             }
         }
         [ReadOnlyAttribute]
@@ -77,7 +82,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.IsMACWithExceptionAllowEmpty(value, out this._mac);
+                NetworkAddressTest.IsMAC(value, out this._mac, true, true);
             }
         }
         public MatchClientEnum match_client { get; set; }
@@ -90,7 +95,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             internal protected set
             {
-                NetworkAddressTest.IsIPv4CidrWithException(value, out this._network);
+                NetworkAddressTest.IsIPv4Cidr(value, out this._network, false, true);
             }
         }
         public string nextserver
@@ -101,7 +106,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.IsIPv4OrFqdnWithExceptionAllowEmpty(value, "nextserver", out this._nextserver);
+                NetworkAddressTest.IsIPv4AddressOrFQDN(value, "nextserver", out this._nextserver, true, true);
             }
         }
         public uint pxe_lease_time { get; set; }

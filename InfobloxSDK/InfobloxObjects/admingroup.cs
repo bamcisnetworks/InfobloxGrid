@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -25,7 +25,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 foreach (string email in value)
                 {
                     string temp = String.Empty;
-                    NetworkAddressTest.IsValidEmailWithException(email, out temp);
+                    NetworkAddressTest.IsValidEmail(email, out temp, false, true);
                     this._email_addresses.Add(temp);
                 }
             }

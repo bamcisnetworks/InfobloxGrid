@@ -1,10 +1,11 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
 {
@@ -36,7 +37,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "bootserver", out this._bootserver);
+                NetworkAddressTest.IsFqdn(value, "bootserver", out this._bootserver, true, true);
             }
         }
         public bool client_identifier_prepend_zero { get; set; }
@@ -48,7 +49,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "ddns_domainname", out this._ddns_domainname);
+                NetworkAddressTest.IsFqdn(value, "ddns_domainname", out this._ddns_domainname, true, true);
             }
         }
         public string ddns_hostname
@@ -59,7 +60,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "ddns_hostname", out this._ddns_hostname);
+                NetworkAddressTest.IsFqdn(value, "ddns_hostname", out this._ddns_hostname, true, true);
             }
         }
         public bool deny_bootp { get; set; }
@@ -99,7 +100,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "ipv6_ddns_domainname", out this._ipv6_ddns_domainname);
+                NetworkAddressTest.IsFqdn(value, "ipv6_ddns_domainname", out this._ipv6_ddns_domainname, true, true);
             }
         }
         public string ipv6_ddns_hostname
@@ -110,7 +111,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "ipv6_ddns_hostname", out this._ipv6_ddns_hostname);
+                NetworkAddressTest.IsFqdn(value, "ipv6_ddns_hostname", out this._ipv6_ddns_hostname, true, true);
             }
         }
         public string ipv6_domain_name
@@ -121,7 +122,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "ipv6_domain_name", out this._ipv6_domain_name);
+                NetworkAddressTest.IsFqdn(value, "ipv6_domain_name", out this._ipv6_domain_name, true, true);
             }
         }
         public string[] ipv6_domain_name_servers
@@ -136,9 +137,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
 
                 foreach (string item in value)
                 {
-                    string temp = String.Empty;
-                    NetworkAddressTest.isIPv6WithException(item, out temp);
-                    this._ipv6_domain_name_servers.Add(temp);
+                    IPAddress IP;
+                    if (NetworkAddressTest.IsIPv6Address(item, out IP, false, true))
+                    {
+                        this._ipv6_domain_name_servers.Add(IP.ToString());
+                    }
                 }
             }
         }
@@ -151,7 +154,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsIPv6DUIDWithExceptionAllowEmpty(value, out this._ipv6_duid);
+                NetworkAddressTest.IsIPv6DUID(value, out this._ipv6_duid, true, true);
             }
         }
         public bool ipv6_enable_ddns { get; set; }
@@ -195,7 +198,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsMACWithExceptionAllowEmpty(value, out this._mac);
+                NetworkAddressTest.IsMAC(value, out this._mac, true, true);
             }
         }
         public MatchClientRoamingHostEnum match_client { get; set; }
@@ -209,7 +212,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
             }
             set
             {
-                NetworkAddressTest.IsIPv4OrFqdnWithExceptionAllowEmpty(value, "nextserver", out this._nextserver);
+                NetworkAddressTest.IsIPv4AddressOrFQDN(value, "nextserver", out this._nextserver, true, true);
             }
         }
         public dhcpoption[] options { get; set; }

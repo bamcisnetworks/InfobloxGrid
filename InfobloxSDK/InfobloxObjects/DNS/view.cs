@@ -1,10 +1,11 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Grid.CloudApi;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Grid.CloudApi;
 using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.DNS
 {
@@ -33,11 +34,12 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
 
                 foreach (string item in value)
                 {
-                    string temp = String.Empty;
-                    NetworkAddressTest.isIPv4WithException(item, out temp);
-                    this._blacklist_redirect_addresses.Add(temp);
+                    IPAddress IP;
+                    if (NetworkAddressTest.IsIPv4Address(item, out IP, false, true))
+                    {
+                        this._blacklist_redirect_addresses.Add(IP.ToString());
+                    }
                 }
-
             }
         }
         public uint blacklist_redirect_ttl { get; set; }
@@ -76,9 +78,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
 
                 foreach (string item in value)
                 {
-                    string temp = String.Empty;
-                    NetworkAddressTest.isIPv4WithException(item, out temp);
-                    this._forwarders.Add(temp);
+                    IPAddress IP;
+                    if (NetworkAddressTest.IsIPv4Address(item, out IP, false, true))
+                    {
+                        this._forwarders.Add(IP.ToString());
+                    }
                 }
             }
         }
@@ -132,7 +136,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 foreach (string item in value)
                 {
                     string temp = String.Empty;
-                    NetworkAddressTest.isIPWithException(item, out temp);
+                    NetworkAddressTest.IsIPAddress(item, out temp, false, true);
                     this._nxdomain_redirect_addresses.Add(temp);
                 }
             }

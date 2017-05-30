@@ -1,9 +1,10 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
 using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.DNS
 {
@@ -25,7 +26,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithExceptionAllowEmpty(value, "domain_name", out this._domain_name);
+                NetworkAddressTest.IsFqdn(value, "domain_name", out this._domain_name, true, true);
             }
         }
         public string[] domain_name_servers
@@ -40,9 +41,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
 
                 foreach (string item in value)
                 {
-                    string temp = String.Empty;
-                    NetworkAddressTest.isIPv6WithException(item, out temp);
-                    this._domain_name_servers.Add(temp);
+                    IPAddress IP;
+                    if (NetworkAddressTest.IsIPv6Address(item, out IP, false, true))
+                    {
+                        this._domain_name_servers.Add(IP.ToString());
+                    }
                 }
             }
         }
@@ -55,7 +58,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.IsIPv6DUIDWithExceptionAllowEmpty(value, out this._duid);
+                NetworkAddressTest.IsIPv6DUID(value, out this._duid, true, true);
             }
         }
         [SearchableAttribute(Equality = true, Regex = true)]
@@ -67,7 +70,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.isIPv6WithExceptionAllowEmpty(value, out this._ipv6addr);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv6Address(value, out IP, true, true))
+                {
+                    this._ipv6addr = IP.ToString();
+                }
             }
         }
         [SearchableAttribute(Equality = true, Regex = true)]
@@ -79,7 +86,12 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.isIPv6WithExceptionAllowEmpty(value, out this._ipv6prefix);
+                IPAddress IP;
+
+                if (NetworkAddressTest.IsIPv6Address(value, out IP, true, true))
+                {
+                    this._ipv6prefix = IP.ToString();
+                }
             }
         }
         [SearchableAttribute(Equality = true, LessThan = true, GreaterThan = true)]

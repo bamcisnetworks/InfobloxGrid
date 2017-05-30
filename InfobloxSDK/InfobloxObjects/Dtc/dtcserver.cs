@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Dtc;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Dtc;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.Dtc
 {
@@ -34,7 +34,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Dtc
             }
             set
             {
-                NetworkAddressTest.IsIPv4OrFqdnWithException(value, "translation", out this._translation);
+                NetworkAddressTest.IsIPv4AddressOrFQDN(value, "translation", out this._translation, false, true);
             }
         }
         public bool use_translation { get; set; }

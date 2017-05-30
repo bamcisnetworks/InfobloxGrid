@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -23,7 +23,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "dns_ptrdname", out this._dns_ptrdname);
+                NetworkAddressTest.IsFqdn(value, "dns_ptrdname", out this._dns_ptrdname, false, true);
             }
         }
         [SearchableAttribute(Equality = true, Regex = true)]
@@ -35,7 +35,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.isIPv4WithExceptionAllowEmpty(value, out this._ipv4addr);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv4Address(value, out IP, true, true))
+                {
+                    this._ipv4addr = IP.ToString();
+                }
             }
         }
         [SearchableAttribute(Equality = true, Regex = true)]
@@ -47,7 +51,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.isIPv6WithExceptionAllowEmpty(value, out this._ipv6addr);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv6Address(value, out IP, true, true))
+                {
+                    this._ipv6addr = IP.ToString();
+                }
             }
         }
         [Required]
@@ -60,7 +68,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
             }
             set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "ptrdname", out this._ptrdname);
+                NetworkAddressTest.IsFqdn(value, "ptrdname", out this._ptrdname, false, true);
             }
         }
 

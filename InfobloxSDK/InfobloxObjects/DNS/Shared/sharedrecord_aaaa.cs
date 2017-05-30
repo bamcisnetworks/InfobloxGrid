@@ -1,5 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.DNS.Shared
 {
@@ -18,7 +19,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS.Shared
             }
             set
             {
-                NetworkAddressTest.isIPv6WithException(value, out this._ipv6addr);
+                IPAddress IP;
+                if (NetworkAddressTest.IsIPv6Address(value, out IP, false, true))
+                {
+                    this._ipv6addr = IP.ToString();
+                }
             }
         }
 

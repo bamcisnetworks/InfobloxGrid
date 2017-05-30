@@ -1,6 +1,6 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.InfobloxStructs;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.InfobloxStructs;
 
 namespace BAMCIS.Infoblox.InfobloxObjects
 {
@@ -20,7 +20,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             internal protected set
             {
-                NetworkAddressTest.IsValidEmailWithException(value, out this._soa_email);
+                NetworkAddressTest.IsValidEmail(value, out this._soa_email, false, true);
             }
         }
         [ReadOnlyAttribute]
@@ -34,7 +34,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             internal protected set
             {
-                NetworkAddressTest.IsFqdnWithException(value, "soa_mname", out this._soa_mname);
+                NetworkAddressTest.IsFqdn(value, "soa_mname", out this._soa_mname, false, true);
             }
         }
         [ReadOnlyAttribute]

@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
 using System;
 
 namespace BAMCIS.Infoblox.InfobloxObjects
@@ -109,7 +109,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             set
             {
-                NetworkAddressTest.IsValidEmailWithException(value, out this._guest_email, true);
+                NetworkAddressTest.IsValidEmail(value, out this._guest_email, true, true);
             }
         }
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
@@ -172,7 +172,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
             set
             {
-                NetworkAddressTest.IsMACWithExceptionAllowEmpty(value, out this._mac);
+                NetworkAddressTest.IsMAC(value, out this._mac, true, true);
             }
         }
         [SearchableAttribute(Equality = true)]

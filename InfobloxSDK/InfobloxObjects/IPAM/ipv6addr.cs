@@ -1,6 +1,7 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.BaseObjects;
-using BAMCIS.Infoblox.Common.Enums;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.BaseObjects;
+using BAMCIS.Infoblox.Core.Enums;
+using System.Net;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
 {
@@ -21,7 +22,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
             }
             set
             {
-                NetworkAddressTest.IsIPv6DUIDWithExceptionAllowEmpty(value, out this._duid);
+                NetworkAddressTest.IsIPv6DUID(value, out this._duid, true, true);
             }
         }
         [ReadOnlyAttribute]
@@ -34,7 +35,12 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
             }
             internal protected set
             {
-                NetworkAddressTest.isIPv6WithExceptionAllowEmpty(value, out this._ip_address);
+                IPAddress IP;
+
+                if (NetworkAddressTest.IsIPv6Address(value, out IP, true, true))
+                {
+                    this._ip_address = IP.ToString();
+                }
             }
         }
         
@@ -48,7 +54,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
             }
             internal protected set
             {
-                NetworkAddressTest.IsIPv4CidrWithExceptionAllowEmpty(value, out this._network);
+                NetworkAddressTest.IsIPv6Cidr(value, out this._network, true, true);
             }
         }
         [ReadOnlyAttribute]

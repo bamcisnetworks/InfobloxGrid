@@ -1,4 +1,4 @@
-﻿using BAMCIS.Infoblox.Common;
+﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.Errors;
 using Newtonsoft.Json;
 using System;
@@ -69,6 +69,11 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
 
                     try
                     {
+                        //Because I'm using .Result instead of await, the exception thrown is an AggregrateException
+                        //instead of a normal exception if we'd used await like IBXCommonMethods.GetAsnyc() does
+                        //So the resulting InfobloxCustomException isn't as informative, may need to update logic
+                        //to use the InvokeGenericAsync() logic being used in PSExtensionMethods to keep ProcessRecord
+                        //as a sync function
                         HttpResponseMessage Response = Client.GetAsync("?_schema").Result;
 
                         WriteVerbose(Response.RequestMessage.RequestUri.ToString());

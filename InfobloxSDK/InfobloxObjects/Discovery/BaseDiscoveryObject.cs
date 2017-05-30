@@ -1,5 +1,5 @@
-﻿using BAMCIS.Infoblox.Common;
-using BAMCIS.Infoblox.Common.InfobloxStructs.Discovery;
+﻿using BAMCIS.Infoblox.Core;
+using BAMCIS.Infoblox.Core.InfobloxStructs.Discovery;
 
 namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
 {
