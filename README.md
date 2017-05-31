@@ -12,35 +12,35 @@ version 2.3, but it's a lot of work to go through that stupidly long Infoblox WA
 
 ## Example Usage
 
-Import-Module -Name InfobloxGrid
+    Import-Module -Name InfobloxGrid
 
-[System.String]$GM = "192.168.0.90"
+    [System.String]$GM = "192.168.0.90"
 
-Enter-IBXSession -GridMaster $GM -Credential (New-Object -TypeName System.Management.Automation.PSCredential("admin", (ConvertTo-SecureString -String "infoblox" -AsPlainText -Force))) -Version LATEST
+    Enter-IBXSession -GridMaster $GM -Credential (New-Object -TypeName System.Management.Automation.PSCredential("admin", (ConvertTo-SecureString -String "infoblox" -AsPlainText -Force))) -Version LATEST
 
-$ZoneRef = New-IbxZoneObject -ZoneType ZONE_AUTH -Fqdn contoso.com -PassThru
+    $ZoneRef = New-IbxZoneObject -ZoneType ZONE_AUTH -Fqdn contoso.com -PassThru
 
-$Zones = Get-IBXObject -SearchValue "contoso.com" -ObjectType ZONE_AUTH -SearchField fqdn -SearchType Equality 
+    $Zones = Get-IBXObject -SearchValue "contoso.com" -ObjectType ZONE_AUTH -SearchField fqdn -SearchType Equality 
 
-$ARecord = New-Object BAMCIS.Infoblox.InfobloxObjects.DNS.a("arecord.contoso.com","192.168.100.3")
+    $ARecord = New-Object BAMCIS.Infoblox.InfobloxObjects.DNS.a("arecord.contoso.com","192.168.100.3")
 
-$RecordRef = New-IbxDnsRecord -InputObject $ARecord -PassThru -Verbose
+    $RecordRef = New-IbxDnsRecord -InputObject $ARecord -PassThru -Verbose
 
-$HostRecordRef = New-IBXDnsHostRecord -HostName "server.contoso.com" -IP 192.168.100.3 -PassThru
+    $HostRecordRef = New-IBXDnsHostRecord -HostName "server.contoso.com" -IP 192.168.100.3 -PassThru
 
-$HostIPRef = Add-IBXIPAddressToHostRecord -Reference $HostRecordRef -IP 192.168.100.4 -PassThru -Force
+    $HostIPRef = Add-IBXIPAddressToHostRecord -Reference $HostRecordRef -IP 192.168.100.4 -PassThru -Force
 
-$HostRecordObject = Get-IBXObject -Reference $HostRecordRef
+    $HostRecordObject = Get-IBXObject -Reference $HostRecordRef
 
-$RemovedRecord = Remove-IBXObject -Reference $HostRecordObject._ref -Force -PassThru
+    $RemovedRecord = Remove-IBXObject -Reference $HostRecordObject._ref -Force -PassThru
 
-Remove-IBXObject -Reference $Zones[0]._ref -Force -PassThru
+    Remove-IBXObject -Reference $Zones[0]._ref -Force -PassThru
 
-Exit-IBXSession
+    Exit-IBXSession
 
 This could have also been done with a New-IBXSession command like this:
 
-$Session = New-IBXSession -GridMaster $GM -Credential (New-Object -TypeName System.Management.Automation.PSCredential("admin", (ConvertTo-SecureString -String "infoblox" -AsPlainText -Force))) -Version LATEST
+    $Session = New-IBXSession -GridMaster $GM -Credential (New-Object -TypeName System.Management.Automation.PSCredential("admin", (ConvertTo-SecureString -String "infoblox" -AsPlainText -Force))) -Version LATEST
 
 And then supplied the $Session variable to each command. The Grid Master and credentials parameters could also explicitly by specified for each command, but this is slower. The Session, either by providing the session or
 calling Enter-IBXSession uses an HTTP cookie for authentication and resorts to Basic HTTP authentication only if the cookie expires. This approach provides faster HTTP communication.
@@ -50,34 +50,34 @@ calling Enter-IBXSession uses an HTTP cookie for authentication and resorts to B
 The cmdlets all throw a custom exception, which you can catch and enumerate details about the error from the grid master. The following is an example of the Grid Master timing out which
 causes an exception to be thrown and how to deal with processing records. The ErrorActionPreference variable should be set to Stop in order to catch the exception.
 
-$TopLevelDomains = @("contoso.com", "tailspintoys.com")
+    $TopLevelDomains = @("contoso.com", "tailspintoys.com")
 
-[System.Collections.Generic.Stack[System.String]]$Zones = New-Object -TypeName System.Collections.Generic.Stack[System.String]
+    [System.Collections.Generic.Stack[System.String]]$Zones = New-Object -TypeName System.Collections.Generic.Stack[System.String]
 
-foreach ($Zone in $TopLevelDomains)
-{
-    $Zones.Push($Zone)
-}
-
-while ($Zones.Count -gt 0)
-{
-    $Zone = $Zones.Pop()
-
-    try
+    foreach ($Zone in $TopLevelDomains)
     {
-        Write-Host "ZONE: $Zone" -ForegroundColor Green
-
-        New-IBXZoneObject -ZoneType ZONE_AUTH -Fqdn $Zone -Timeout 300 -ErrorAction Stop
+        $Zones.Push($Zone)
     }
-    catch [BAMCIS.Infoblox.Errors.InfobloxCustomException]
+
+    while ($Zones.Count -gt 0)
     {
-        if ($_.Exception.HttpResponseCode -eq 502 -or $_.Exception.Error -eq "ConnectFailure")
+        $Zone = $Zones.Pop()
+
+        try
         {
-			Write-Host -Object "`tRETRY: Adding retry zone $Zone and all associated records" -ForegroundColor Yellow
-            $Zones.Push($Zone)
-        }
-    }
-}
+			Write-Host "ZONE: $Zone" -ForegroundColor Green
+
+			New-IBXZoneObject -ZoneType ZONE_AUTH -Fqdn $Zone -Timeout 300 -ErrorAction Stop
+		}
+		catch [BAMCIS.Infoblox.Errors.InfobloxCustomException]
+		{
+			if ($_.Exception.HttpResponseCode -eq 502 -or $_.Exception.Error -eq "ConnectFailure")
+			{
+				Write-Host -Object "`tRETRY: Adding retry zone $Zone and all associated records" -ForegroundColor Yellow
+				$Zones.Push($Zone)
+			}
+		}
+	}
 
 The custom exception has the following properties:
 
