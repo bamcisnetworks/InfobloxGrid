@@ -364,6 +364,16 @@ namespace BAMCIS.Infoblox.Core
             }
         }
 
+        /// <summary>
+        /// Validates that the email address is in a valid format. 
+        /// 
+        /// This function is derived from https://msdn.microsoft.com/en-us/library/01escwtf.aspx.
+        /// </summary>
+        /// <param name="emailAddress">The email address to validate</param>
+        /// <param name="email">The email address outputed with Idn conversion</param>
+        /// <param name="allowEmpty">Specify if an empty string for emailAddress is valid for the parameter being checked</param>
+        /// <param name="throwExceptionOnMiss">Specify to throw an exception if the email address doesn't match</param>
+        /// <returns></returns>
         public static bool IsValidEmail(this string emailAddress, out string email, bool allowEmpty = false, bool throwExceptionOnMiss = false)
         {
             Invalid = false;
