@@ -400,16 +400,17 @@ namespace BAMCIS.Infoblox.Core
                     }
                 }
 
-                // Return true if strIn is in valid e-mail format.
+                // Return true if emailAddress is in valid e-mail format.
                 try
                 {
-                    bool Result = Regex.IsMatch(emailAddress,
+                    Match Result = Regex.Match(emailAddress.Trim(),
                           @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
                           @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-\w]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
                           RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
 
-                    if (Result)
+                    if (Result.Success)
                     {
+                        email = Result.Groups[0].Value; //Set the out value to the email address supplied
                         return true;
                     }
                     else
@@ -442,6 +443,7 @@ namespace BAMCIS.Infoblox.Core
 
                 if (allowEmpty)
                 {
+                    email = String.Empty;
                     return true;
                 }
                 else
