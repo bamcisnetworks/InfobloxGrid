@@ -9,11 +9,16 @@ namespace BAMCIS.Infoblox.InfobloxObjects
         private string _member;
 
         [ReadOnlyAttribute]
+        [Basic]
         public RestartStatusEnum dhcp_status { get; internal protected set; }
+
         [ReadOnlyAttribute]
+        [Basic]
         public RestartStatusEnum dns_status { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string member
         {
             get
@@ -25,7 +30,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsFqdn(value, "member", out this._member, false, true);
             }
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public RestartStatusEnum reporting_status { get; internal protected set; }
     }
 }

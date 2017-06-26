@@ -7,10 +7,16 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
         private string _network_view;
 
         public bool ddns_generate_hostname { get; set; }
+
         public bool ddns_server_always_updates { get; set; }
+
         public uint ddns_ttl { get; set; }
+
         public bool disable { get; set; }
+
         public bool enable_ddns { get; set; }
+
+        [Basic]
         public string network_view
         {
             get
@@ -22,12 +28,19 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._network_view = value.TrimValue();
             }
         }
+
         public dhcpoption[] options { get; set; }
+
         public bool update_dns_on_lease_renewal { get; set; }
+
         public bool use_ddns_generate_hostname { get; set; }
+
         public bool use_ddns_ttl { get; set; }
+
         public bool use_enable_ddns { get; set; }
+
         public bool use_options { get; set; }
+
         public bool use_update_dns_on_lease_renewal { get; set; }
 
         public BaseNetworkLow()
@@ -46,6 +59,5 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
             this.use_options = false;
             this.use_update_dns_on_lease_renewal = false;
         }
-
     }
 }

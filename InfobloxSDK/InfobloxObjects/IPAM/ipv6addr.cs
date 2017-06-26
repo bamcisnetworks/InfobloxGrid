@@ -14,6 +14,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
         
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string duid
         {
             get
@@ -25,8 +26,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
                 NetworkAddressTest.IsIPv6DUID(value, out this._duid, true, true);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, LessThan = true, GreaterThan = true)]
+        [Basic]
         public string ip_address
         {
             get
@@ -46,6 +49,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
         
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string network
         {
             get
@@ -57,9 +61,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
                 NetworkAddressTest.IsIPv6Cidr(value, out this._network, true, true);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public IPv6IPAMAddressStatusEnum status { get; internal protected set; }
-
     }
 }

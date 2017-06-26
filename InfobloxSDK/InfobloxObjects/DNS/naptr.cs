@@ -29,6 +29,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsFqdn(value, "dns_replacement", out this._dns_replacement, false, true);
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string flags
         {
@@ -52,6 +53,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [ReadOnlyAttribute]
         public long last_queried
         {
@@ -64,8 +66,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._last_queried = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [Required]
         [SearchableAttribute(LessThan = true, Equality = true, GreaterThan = true)]
+        [Basic]
         public uint order
         {
             get
@@ -84,8 +88,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [Required]
         [SearchableAttribute(LessThan = true, Equality = true, GreaterThan = true)]
+        [Basic]
         public uint preference
         {
             get
@@ -104,6 +110,8 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
+        [Basic]
         public string regexp
         {
             get
@@ -115,8 +123,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._regexp = value.TrimValue();
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string replacement
         {
             get
@@ -128,7 +138,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsFqdn(value, "replacement", out this._replacment, false, true);
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string services
         {
             get

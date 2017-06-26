@@ -9,7 +9,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.ADSites
     {
         [Required]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string domain { get; set; }
+
         public ipv4network[] networks { get; set; }
 
         public site(string name)

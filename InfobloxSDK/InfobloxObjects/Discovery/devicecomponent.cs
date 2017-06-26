@@ -3,7 +3,7 @@
 namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
 {
     [Name("discovery:devicecomponent")]
-    public class devicecomponent
+    public class devicecomponent : RefObject
     {
         private string _component_name;
         private string _description;
@@ -12,6 +12,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
         private string _type;
 
         [ReadOnlyAttribute]
+        [Basic]
         public string component_name 
         { 
             get
@@ -23,7 +24,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._component_name = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public string description 
         {
             get
@@ -35,10 +38,13 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._description = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
         public string device { get; internal protected set; }
+
         [ReadOnlyAttribute]
+        [Basic]
         public string model 
         {
             get
@@ -50,7 +56,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._model = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public string serial 
         {
             get
@@ -62,7 +70,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._serial = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public string type 
         {
             get

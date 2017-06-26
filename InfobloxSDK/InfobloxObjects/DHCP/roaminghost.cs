@@ -27,8 +27,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
         private string _nextserver;
 
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public AddressTypeEnum address_type { get; set; }
+
         public string bootfile { get; set; }
+
         public string bootserver
         {
             get
@@ -40,7 +43,29 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsFqdn(value, "bootserver", out this._bootserver, true, true);
             }
         }
+
         public bool client_identifier_prepend_zero { get; set; }
+
+        [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        public override string comment
+        {
+            get
+            {
+                return this._comment;
+            }
+            set
+            {
+                if (value.TrimValue().Length <= 256)
+                {
+                    this._comment = value.TrimValue();
+                }
+                else
+                {
+                    throw new ArgumentException("The comment cannot exceed 256 characters.");
+                }
+            }
+        }
+
         public string ddns_domainname
         {
             get
@@ -52,6 +77,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsFqdn(value, "ddns_domainname", out this._ddns_domainname, true, true);
             }
         }
+
         public string ddns_hostname
         {
             get
@@ -63,7 +89,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsFqdn(value, "ddns_hostname", out this._ddns_hostname, true, true);
             }
         }
+
         public bool deny_bootp { get; set; }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string dhcp_client_identifier
         {
@@ -76,10 +104,15 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._dhcp_client_identifier = value.TrimValue();
             }
         }
+
         public bool disable { get; set; }
+
         public bool enable_ddns { get; set; }
+
         public bool force_roaming_hostname { get; set; }
+
         public bool ignore_dhcp_option_list_request { get; set; }
+
         [ReadOnlyAttribute]
         public string ipv6_client_hostname
         {
@@ -92,6 +125,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._ipv6_client_hostname = value.TrimValue();
             }
         }
+
         public string ipv6_ddns_domainname
         {
             get
@@ -103,6 +137,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsFqdn(value, "ipv6_ddns_domainname", out this._ipv6_ddns_domainname, true, true);
             }
         }
+
         public string ipv6_ddns_hostname
         {
             get
@@ -114,6 +149,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsFqdn(value, "ipv6_ddns_hostname", out this._ipv6_ddns_hostname, true, true);
             }
         }
+
         public string ipv6_domain_name
         {
             get
@@ -125,6 +161,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsFqdn(value, "ipv6_domain_name", out this._ipv6_domain_name, true, true);
             }
         }
+
         public string[] ipv6_domain_name_servers
         {
             get
@@ -145,6 +182,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string ipv6_duid
         {
@@ -157,8 +195,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsIPv6DUID(value, out this._ipv6_duid, true, true);
             }
         }
+
         public bool ipv6_enable_ddns { get; set; }
+
         public bool ipv6_force_roaming_hostname { get; set; }
+
         [SearchableAttribute(Equality = true)]
         public string ipv6_match_option
         {
@@ -186,9 +227,12 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public dhcpoption[] ipv6_options { get; set; }
+
         [NotReadableAttribute]
         public string ipv6_template { get; set; }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string mac
         {
@@ -201,9 +245,13 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsMAC(value, out this._mac, true, true);
             }
         }
+
         public MatchClientRoamingHostEnum match_client { get; set; }
+
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string network_view { get; set; }
+
         public string nextserver
         {
             get
@@ -215,26 +263,46 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsIPv4AddressOrFQDN(value, "nextserver", out this._nextserver, true, true);
             }
         }
+
         public dhcpoption[] options { get; set; }
+
         public uint preferred_lifetime { get; set; }
+
         public uint pxe_lease_time { get; set; }
+
         [NotReadableAttribute]
         public string template { get; set; }
+
         public bool use_bootfile { get; set; }
+
         public bool use_bootserver { get; set; }
+
         public bool use_ddns_domainname { get; set; }
+
         public bool use_deny_bootp { get; set; }
+
         public bool use_enable_ddns { get; set; }
+
         public bool use_ignore_dhcp_option_list_request { get; set; }
+
         public bool use_ipv6_ddns_domainname { get; set; }
+
         public bool use_ipv6_domain_name { get; set; }
+
         public bool use_ipv6_domain_name_servers { get; set; }
+
         public bool use_ipv6_enable_ddns { get; set; }
+
         public bool use_ipv6_options { get; set; }
+
         public bool use_nextserver { get; set; }
+
         public bool use_options { get; set; }
+
         public bool use_preferred_lifetime { get; set; }
+
         public bool use_valid_lifetime { get; set; }
+
         public uint valid_lifetime { get; set; }
 
 

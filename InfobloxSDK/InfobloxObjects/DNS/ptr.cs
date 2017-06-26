@@ -26,6 +26,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsFqdn(value, "dns_ptrdname", out this._dns_ptrdname, false, true);
             }
         }
+
         [SearchableAttribute(Equality = true, Regex = true)]
         public string ipv4addr
         {
@@ -42,6 +43,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [SearchableAttribute(Equality = true, Regex = true)]
         public string ipv6addr
         {
@@ -58,8 +60,25 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
+        [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        public override string name
+        {
+            get
+            {
+                return base.name;
+            }
+            set
+            {
+                string temp = String.Empty;
+                NetworkAddressTest.IsFqdn(value, "name", out temp, false, true);
+                base.name = temp;
+            }
+        }
+
         [Required]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string ptrdname
         {
             get

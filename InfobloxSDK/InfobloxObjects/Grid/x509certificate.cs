@@ -11,13 +11,19 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid
 
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string issuer { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string serial { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string subject { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Negative = true, LessThan = true, Equality = true, GreaterThan = true)]
         public long valid_not_after 
@@ -31,6 +37,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid
                 this._valid_not_after = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Negative = true, LessThan = true, Equality = true, GreaterThan = true)]
         public long valid_not_before

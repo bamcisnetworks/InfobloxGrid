@@ -8,10 +8,14 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Dtc.Topology
     public class rule : RefObject
     {
         public DestinationTypeEnum dest_type { get; set; }
+
         public string destination_link { get; set; }
+
         public topologyrulesource[] sources { get; set; }
+
         [SearchableAttribute(Equality = true)]
         public string topology { get; set; }
+
         [ReadOnlyAttribute]
         public bool valid { get; internal protected set; }
 

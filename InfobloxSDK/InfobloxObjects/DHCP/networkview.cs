@@ -10,9 +10,12 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
     public class networkview : BaseNameCommentObject
     {
         public info cloud_info { get; set; }
+
         public dhcpddns[] ddns_zone_primaries { get; set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public bool is_default { get; internal protected set; }
 
         public networkview(string name)

@@ -10,10 +10,15 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid
         private DateTime _deployment_time;
 
         [ReadOnlyAttribute]
+        [Basic]
         public uint binary_major_version { get; internal protected set; }
+
         [ReadOnlyAttribute]
+        [Basic]
         public uint binary_minor_version { get; internal protected set; }
+
         [ReadOnlyAttribute]
+        [Basic]
         public long build_time 
         {
             get
@@ -25,9 +30,13 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid
                 this._build_time = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public string database_type { get; internal protected set; }
+
         [ReadOnlyAttribute]
+        [Basic]
         public long deployment_time 
         {
             get

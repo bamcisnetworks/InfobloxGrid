@@ -28,6 +28,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._bootfile = value.TrimValue();
             }
         }
+
         public string bootserver
         {
             get
@@ -39,11 +40,16 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsIPv4AddressOrFQDN(value, "bootserver", out this._bootserver, true, true);
             }
         }
+
         public bool deny_bootp { get; set; }
+
         public bool enable_pxe_lease_time { get; set; }
+
         public bool ignore_client_requested_options { get; set; }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string ipv4addr
         {
             get
@@ -59,8 +65,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [ReadOnlyAttribute]
         public bool is_invalid_mac { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public long last_queried
         {
@@ -73,7 +81,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._last_queried = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string mac
         {
             get
@@ -85,7 +95,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsMAC(value, out this._mac, true, true);
             }
         }
+
         public MatchClientEnum match_client { get; set; }
+
         [ReadOnlyAttribute]
         public string network
         {
@@ -98,6 +110,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsIPv4Cidr(value, out this._network, false, true);
             }
         }
+
         public string nextserver
         {
             get
@@ -109,12 +122,19 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsIPv4AddressOrFQDN(value, "nextserver", out this._nextserver, true, true);
             }
         }
+
         public uint pxe_lease_time { get; set; }
+
         public bool use_bootfile { get; set; }
+
         public bool use_bootserver { get; set; }
+
         public bool use_deny_bootp { get; set; }
+
         public bool use_ignore_client_requested_options { get; set; }
+
         public bool use_nextserver { get; set; }
+
         public bool use_pxe_lease_time { get; set; }
 
         public host_ipv4addr(string ipv4addr)

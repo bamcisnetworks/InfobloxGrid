@@ -11,6 +11,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
 
         [Required]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string canonical
         {
             get
@@ -22,6 +23,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsFqdn(value, "canonical", out this._canonical, false, true);
             }
         }
+
         [ReadOnlyAttribute]
         public string dns_canonical 
         {

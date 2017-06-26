@@ -7,6 +7,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
     {
         private string _host;
 
+        [Basic]
         public bool configure_for_dhcp { get; set; }
 
         [ReadOnlyAttribute]
@@ -17,6 +18,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
         public discoverydata discovered_data { get; internal protected set; }
 
         [ReadOnlyAttribute]
+        [Basic]
         public string host
         {
             get

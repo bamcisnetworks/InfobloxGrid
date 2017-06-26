@@ -4,7 +4,11 @@
     {
         private string _dns_name;
 
+        [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        public override string comment { get => base.comment; set => base.comment = value; }
+
         public bool disable { get; set; }
+
         [ReadOnlyAttribute]
         public string dns_name
         {
@@ -17,9 +21,13 @@
                 NetworkAddressTest.IsFqdn(value, "dns_name", out this._dns_name, false, true);
             }
         }
+
         public uint ttl { get; set; }
+
         public bool use_ttl { get; set; }
+
         [Required]
+        [Basic]
         public string shared_record_group { get; set; }
 
         public BaseSharedRecord(string shared_record_group)

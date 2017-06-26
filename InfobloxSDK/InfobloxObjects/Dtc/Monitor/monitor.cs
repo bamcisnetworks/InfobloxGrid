@@ -11,6 +11,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Dtc.Monitor
         private uint _port;
 
         public string monitor { get; set; }
+
         public uint port
         {
             get
@@ -29,6 +30,8 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Dtc.Monitor
                 }
             }
         }
+
+        [Basic]
         public TransportTypeEnum type { get; set; }
 
         public dtcmonitor()

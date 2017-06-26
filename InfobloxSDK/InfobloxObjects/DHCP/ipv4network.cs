@@ -31,7 +31,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
         private string _nextserver;
 
         public bool authority { get; set; }
+
         public string bootfile { get; set; }
+
         public string bootserver
         {
             get
@@ -63,8 +65,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public bool ddns_update_fixed_addresses { get; set; }
+
         public bool deny_bootp { get; set; }
+
         public string[] email_list
         {
             get
@@ -82,9 +87,13 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public bool enable_dhcp_thresholds { get; set; }
+
         public bool enable_email_warnings { get; set; }
+
         public bool enable_snmp_warnings { get; set; }
+
         public uint high_water_mark 
         {
             get
@@ -103,6 +112,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public uint high_water_mark_reset
         {
             get
@@ -128,8 +138,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public bool ignore_dhcp_option_list_request { get; set; }
+
         public IgnoreIdEnum ignore_id { get; set; }
+
         public string[] ignore_mac_addresses
         {
             get
@@ -154,6 +167,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public string[] ipam_email_addresses
         {
             get
@@ -172,8 +186,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public threshold ipam_threshold_settings { get; set; }
+
         public trap ipam_trap_settings { get; set; }
+
         [SearchableAttribute(Equality = true, Regex = true)]
         public string ipv4addr
         {
@@ -195,6 +212,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public int lease_scavenge_time
         {
             get
@@ -213,6 +231,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public uint low_water_mark 
         { 
             get
@@ -231,6 +250,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public uint low_water_mark_reset
         {
             get
@@ -256,6 +276,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public override object[] members
         {
             get
@@ -298,6 +319,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public uint netmask
         {
             get
@@ -316,8 +338,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string network
         {
             get
@@ -336,6 +360,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public string nextserver
         {
             get
@@ -359,20 +384,35 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public uint pxe_lease_time { get; set; }
+
         public bool use_authority { get; set; }
+
         public bool use_bootfile { get; set; }
+
         public bool use_bootserver { get; set; }
+
         public bool use_ddns_update_fixed_addresses { get; set; }
+
         public bool use_deny_bootp { get; set; }
+
         public bool use_email_list { get; set; }
+
         public bool use_enable_dhcp_thresholds { get; set; }
+
         public bool use_ignore_dhcp_option_list_request { get; set; }
+
         public bool use_ignore_id { get; set; }
+
         public bool use_ipam_email_addresses { get; set; }
+
         public bool use_ipam_threshold_settings { get; set; }
+
         public bool use_ipam_trap_settings { get; set; }
+
         public bool use_lease_scavenge_time { get; set; }
+
         public bool use_nextserver { get; set; }
 
         public ipv4network(string network)

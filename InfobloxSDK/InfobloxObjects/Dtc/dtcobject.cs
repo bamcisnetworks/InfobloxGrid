@@ -12,9 +12,12 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Dtc
         private DateTime _status_time;
 
         [ReadOnlyAttribute]
+        [Basic]
         public string abstract_type { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string comment
         {
             get
@@ -34,14 +37,20 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Dtc
             }
 
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public string display_type { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string[] ipv4_address_list { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string[] ipv6_address_list { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string name
         {
             get
@@ -53,10 +62,14 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Dtc
                 this._name = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public string @object { get; internal protected set; }
+
         [ReadOnlyAttribute]
+        [Basic]
         public DtcColorStatusEnum status { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public long status_time
         {

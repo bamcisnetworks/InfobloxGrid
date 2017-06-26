@@ -25,16 +25,22 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsIPAddress(value, out this._address, false, true);
             }
         }
+
         [ReadOnlyAttribute]
         public bool disable { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string dtc_obscured { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string record { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public uint ttl { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string type 
         {
             get
@@ -56,7 +62,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 }
             }
         }
+
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string view
         {
             get
@@ -68,8 +76,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._view = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string zone { get; internal protected set; }
 
         internal protected allrecords()

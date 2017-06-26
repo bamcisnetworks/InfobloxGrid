@@ -11,18 +11,29 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Dtc
     public class pool : BaseNameCommentObject
     {
         public PoolAvailabilityEnum availability { get; set; }
+
         public bool disable { get; set; }
+
         [ReadOnlyAttribute]
         public health health { get; internal protected set; }
+
         public LbMethodEnum lb_alternate_method { get; set; }
+
         public string lb_alternate_topology { get; set; }
+
         [Required]
         public LbMethodEnum lb_preferred_method { get; set; }
+
         public string lb_preferred_topology { get; set; }
+
         public tcpmonitor[] monitors { get; set; }
+
         public uint quorum { get; set; }
+
         public serverlink[] servers { get; set; }
+
         public uint ttl { get; set; }
+
         public bool use_ttl { get; set; }
 
         public pool(string name, LbMethodEnum lb_preferred_method)

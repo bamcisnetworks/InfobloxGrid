@@ -11,6 +11,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
         private string _soa_mname;
 
         public bool disable_forwarding { get; set; }
+
         [ReadOnlyAttribute]
         public string soa_email
         {
@@ -23,8 +24,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsValidEmail(value, out this._soa_email, false, true);
             }
         }
+
         [ReadOnlyAttribute]
         public uint soa_expire { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string soa_mname
         {
@@ -37,17 +40,25 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsFqdn(value, "soa_mname", out this._soa_mname, false, true);
             }
         }
+
         [ReadOnlyAttribute]
         public uint soa_negative_ttl { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public uint soa_refresh { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public uint soa_retry { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public uint soa_serial_number { get; internal protected set; }
+
         [Required]
+        [Basic]
         public extserver[] stub_from { get; set; }
+
         public memberserver[] stub_members { get; set; }
+
         public msdnsserver[] stub_msservers { get; set; }
 
         public zone_stub(string fqdn, extserver[] stub_from) : base(fqdn)

@@ -14,6 +14,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
 
 
         public bool ddns_enable_option_fqdn { get; set; }
+
         public string domain_name
         {
             get
@@ -25,6 +26,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsFqdn(value, "domain_name", out this._domain_name, true, true);
             }
         }
+
         public string[] domain_name_servers 
         { 
             get
@@ -51,8 +53,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string network
         {
             get
@@ -71,12 +75,19 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public uint preferred_lifetime { get; set; }
+
         public bool use_ddns_enable_option_fqdn { get; set; }
+
         public bool use_domain_name { get; set; }
+
         public bool use_domain_name_servers { get; set; }
+
         public bool use_preferred_lifetime { get; set; }
+
         public bool use_valid_lifetime { get; set; }
+
         public uint valid_lifetime { get; set; }
 
         public ipv6network(string network)

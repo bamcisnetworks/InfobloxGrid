@@ -37,6 +37,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
         public trap ipam_trap_settings { get; set; }
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string network
         {
             get

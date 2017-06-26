@@ -13,6 +13,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.ADSites
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
         public string ea_definition { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string ms_sync_master_name
         {
@@ -25,8 +26,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.ADSites
                 NetworkAddressTest.IsFqdn(value, "ms_sync_master_name", out this._ms_sync_master_name, true, true);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string name
         {
             get
@@ -38,8 +41,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.ADSites
                 this._name = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string netbios
         {
             get
@@ -65,9 +70,12 @@ namespace BAMCIS.Infoblox.InfobloxObjects.ADSites
                 }
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string network_view { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public bool read_only { get; internal protected set; }
     }

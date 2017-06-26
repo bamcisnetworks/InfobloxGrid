@@ -7,6 +7,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Dtc
     {
         [ReadOnlyAttribute]
         public string certificate { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public bool in_use { get; internal protected set; }
     }

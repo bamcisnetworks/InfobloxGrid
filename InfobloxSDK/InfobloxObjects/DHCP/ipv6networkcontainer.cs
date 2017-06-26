@@ -11,6 +11,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
 
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string network
         {
             get

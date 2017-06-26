@@ -25,8 +25,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsFqdn(value, "dns_target", out this._dns_target, false, true);
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public uint port
         {
             get
@@ -45,8 +47,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [Required]
         [SearchableAttribute(LessThan = true, Equality = true, GreaterThan = true)]
+        [Basic]
         public uint priority
         {
             get
@@ -65,8 +69,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string target
         {
             get
@@ -78,8 +84,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsFqdn(value, "target", out this._target, false, true);
             }
         }
+
         [Required]
         [SearchableAttribute(LessThan = true, Equality = true, GreaterThan = true)]
+        [Basic]
         public uint weight
         {
             get
@@ -98,6 +106,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         public srv(string name, uint port, uint priority, string target, uint weight)
         {
             base.name = name;

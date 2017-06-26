@@ -15,9 +15,12 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
         private string _name;
 
         public bool allow_telnet { get; set; }
+
         public clicredential[] cli_credentials { get; set; }
+
         [ReadOnlyAttribute]
         public info cloud_info { get; internal protected set; }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string device_description
         {
@@ -30,6 +33,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._device_description = value.TrimValue();
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string device_location
         {
@@ -42,6 +46,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._device_location = value.TrimValue();
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string device_type
         {
@@ -54,6 +59,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._device_type = value.TrimValue();
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string device_vendor
         {
@@ -66,15 +72,21 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._device_vendor = value.TrimValue();
             }
         }
+
         public bool disable { get; set; }
+
         public bool disable_discovery { get; set; }
+
         [ReadOnlyAttribute]
         public DiscoverNowStatusEnum discover_now_status { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(ContainsSearchable = true)]
         public discoverydata discovered_data { get; internal protected set; }
+
         [NotReadableAttribute]
         public bool enable_immediate_discovery { get; set; }
+
         public override string name 
         {
             get
@@ -86,18 +98,29 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._name = value.TrimValue();
             }
         }
+
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string network_view { get; set; }
+
         public dhcpoption[] options { get; set; }
+
         [NotReadableAttribute]
         public bool restart_if_needed { get; set; }
+
         public snmp3credential snmp3_credential { get; set; }
+
         public snmpcredential snmp_credential { get; set; }
+
         [NotReadableAttribute]
         public string template { get; set; }
+
         public bool use_cli_credentials { get; set; }
+
         public bool use_options { get; set; }
+
         public bool use_snmp3_credential { get; set; }
+
         public bool use_snmp_credential { get; set; }
 
         public BaseFixedAddressObject()

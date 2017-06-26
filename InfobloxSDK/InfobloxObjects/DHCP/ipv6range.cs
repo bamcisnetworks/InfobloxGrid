@@ -21,17 +21,27 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
 
         [SearchableAttribute(Equality = true)]
         public IPv6AddressTypeEnum address_type { get; set; }
+
         public info cloud_info { get; set; }
+
         public bool disbale { get; set; }
+
         [ReadOnlyAttribute]
         public DiscoverNowStatusEnum discover_now_status { get; internal protected set; }
+
         public basicpollsettings discovery_basic_poll_settings { get; set; }
+
         public blackoutsetting discovery_blackout_setting { get; set; }
+
         public string discovery_member { get; set; }
+
         public bool enable_discovery { get; set; }
+
         [NotReadableAttribute]
         public bool enable_immediate_discovery { get; set; }
+
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string end_addr
         {
             get
@@ -51,7 +61,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public exclusionrange[] exclude { get; set; }
+
         [SearchableAttribute(Equality = true, Regex = true)]
         public string ipv6_end_prefix
         {
@@ -75,8 +87,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [SearchableAttribute(Equality = true)]
         public uint ipv6_prefix_bits { get; set; }
+
         [SearchableAttribute(Equality = true, Regex = true)]
         public string ipv6_start_prefix
         {
@@ -100,8 +114,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [SearchableAttribute(Equality = true)]
         public dhcpmember member { get; set; }
+
         [SearchableAttribute(Equality = true, Regex = true)]
         public override string name
         {
@@ -114,8 +130,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 base.name = value;
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string network
         {
             get
@@ -137,16 +155,25 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string network_view { get; set; }
+
         public blackoutsetting port_control_blackout_setting { get; set; }
+
         public bool recycle_leases { get; set; }
+
         [NotReadableAttribute]
         public bool restart_if_needed { get; set; }
+
         public bool same_port_control_discovery_blackout { get; set; }
+
         [SearchableAttribute(Equality = true)]
         public ServerAssociationTypeEnum server_association_type { get; set; }
+
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string start_addr
         {
             get
@@ -169,11 +196,16 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [NotReadableAttribute]
         public string template { get; set; }
+
         public bool use_blackout_setting { get; set; }
+
         public bool use_discovery_basic_polling_settings { get; set; }
+
         public bool use_enable_discovery { get; set; }
+
         public bool use_recycle_leases { get; set; }
 
         public ipv6range(string network, string start_addr, string end_addr)

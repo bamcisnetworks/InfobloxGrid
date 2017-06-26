@@ -14,6 +14,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
         private string _ipv6addr;
 
         public DtcHealthSourceEnum dtc_health_source { get; set; }
+
         public string dtc_health_source_address
         {
             get
@@ -29,8 +30,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 }
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string host_name
         {
             get
@@ -42,8 +45,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsFqdn(value, "host_name", out this._host_name, true, true);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string ipv4addr
         {
             get
@@ -59,8 +64,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 }
             }
         }
+        
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string ipv6addr
         {
             get
@@ -76,6 +83,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 }
             }
         }
+
         public loggingcategories logging_categories { get; set; }
 
         public dnsmember()

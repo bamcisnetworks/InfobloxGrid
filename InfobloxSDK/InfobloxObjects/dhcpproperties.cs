@@ -17,6 +17,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
 
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string host_name
         {
             get
@@ -28,7 +29,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsFqdn(value, "host_name", out this._host_name, true, true);
             }
         }
+
         public IgnoreIdEnum ignore_id { get; set; }
+
         public string[] ignore_mac_addresses
         {
             get
@@ -46,8 +49,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 }
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string ipv4addr
         {
             get
@@ -63,8 +68,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 }
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string ipv6addr
         {
             get
@@ -80,8 +87,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 }
             }
         }
+
         public dhcpoption[] options { get; set; }
+
         public bool use_ignore_id { get; set; }
+
         public bool use_options { get; set; }
 
         public dhcpproperties()

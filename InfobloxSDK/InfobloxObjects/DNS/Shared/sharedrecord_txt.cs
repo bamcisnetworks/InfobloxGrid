@@ -13,6 +13,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS.Shared
         
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string text
         {
             get

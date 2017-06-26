@@ -21,7 +21,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsFqdn(value, "domain_name", out this._domain_name, true, true);
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string name
         {
             get
@@ -33,7 +35,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._name = value.TrimValueWithException("name");
             }
         }
+
         [Required]
+        [Basic]
         public ipv6network[] networks { get; set; } //The network objects must contain a _ref property
 
         public ipv6sharednetwork(string name, ipv6network[] networks)

@@ -22,6 +22,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
 
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string address
         {
             get
@@ -33,10 +34,13 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 NetworkAddressTest.IsIPAddress(value, out this._address, false, true);
             }
         }
+
         [ReadOnlyAttribute]
         public string address_ref { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public bool cap_net_deprovisioning_ind { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string cap_net_deprovisioning_na_reason
         {
@@ -49,8 +53,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._cap_net_deprovisioning_na_reason = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public bool cap_net_provisioning_ind { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string cap_net_provisioning_na_reason
         {
@@ -63,8 +69,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._cap_net_provisioning_na_reason = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public bool cap_net_vlan_provisioning_ind { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string cap_net_vlan_provisioning_na_reason
         {
@@ -77,6 +85,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._cap_net_vlan_provisioning_na_reason = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public string description
         {
@@ -89,8 +98,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._description = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public deviceinterface[] interfaces { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string location 
@@ -104,6 +115,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._location = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string model 
@@ -117,15 +129,21 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._model = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public deviceneighbor[] neighbors { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string network { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public networkinfo[] network_infos { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string network_view { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public object[] networks 
         { 
@@ -139,6 +157,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 ValidateUnknownArray.ValidateHomogenousArray(new List<Type>() { typeof(ipv4network), typeof(ipv6network) }, value, out this._networks);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality =true, Regex = true)]
         public string os_version 
@@ -152,8 +171,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Discovery
                 this._os_version = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public portstatistics port_stats { get; set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string vendor 

@@ -86,3 +86,16 @@ HttpResponseCode - The HTTP response code. If the error didn't occur as part of 
 HttpStatus - The friendly name for the response code.
 HttpErrorReason - The HTTP reason phrase.
 Error - The error message returned from Infoblox as part of the response body, or the exception status.
+
+## Revision History
+
+### 2.0.0.1
+Implemented a "Basic" attribute to properties to enable the "BASIC" option for the -FieldsToReturn parameter on get objects.
+
+### 2.0.0.0
+The module has been split into two separate projects. The first component is an SDK library that is compatible with .NET Framework and .NET Core. It contains all of the models and HTTP methods to execute against the Infoblox WAPI.
+
+The second component is the PowerShell module that calls into the SDK. The whole module has been updated with the way it utilizes the cookie provided by Infoblox. You can now choose to do an Enter-IBXSession to set up persistent credentials, create a new session
+with New-IBXSession and provide it to each IBX command, or provide explicit credentials to each command. The persistent cookie is updated with each new call to the Grid Master. You can clear the persistent credentials with Exit-IBXSession.
+
+System.Net.Http 4.3.2, Newtonsoft.Json 10.0.2, System.Security.Cryptography.Algorithms 4.3.0, System.Security.Cryptography.Encoding 4.3.0, System.Security.Cryptography.Primitives 4.3.0, and System.Security.Cryptography.X509Certificates are bundled with the module.

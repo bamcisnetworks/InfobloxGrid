@@ -12,19 +12,29 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
 
         [NotReadableAttribute]
         public bool auto_create_reversezone { get; set; }
+
         public info cloud_info { get; set; }
+
         [ReadOnlyAttribute]
         public DiscoverNowStatusEnum discover_now_status { get; internal protected set; }
+
         public basicpollsettings discovery_basic_poll_settings { get; set; }
+
         public blackoutsetting discovery_blackout_setting { get; set; }
+
         public string discovery_member { get; set; }
+
         [NotReadableAttribute]
         public bool enable_discovery { get; set; }
+
         public bool enable_immediate_discovery { get; set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
         public string network_container { get; internal protected set; }
+
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string network_view
         {
             get
@@ -36,16 +46,24 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._network_view = value.TrimValue();
             }
         }
+
         public blackoutsetting port_control_blackout_setting { get; set; }
+
         [NotReadableAttribute]
         public bool restart_if_needed { get; set; }
         public bool same_port_control_discovery_blackout { get; set; }
+
         [SearchableAttribute(Equality = true)]
         public bool unmanaged { get; set; }
+
         public bool use_blackout_setting { get; set; }
+
         public bool use_discovery_basic_polling_settings { get; set; }
+
         public bool use_enable_discovery { get; set; }
+
         public bool use_zone_associations { get; set; }
+
         public zoneassociation[] zone_associations { get; set; }
 
         public BaseNetworkContainer()

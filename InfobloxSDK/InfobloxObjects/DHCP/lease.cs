@@ -30,6 +30,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
 
         [ReadOnlyAttribute]
         [SearchableAttribute(Negative = true, LessThan = true, Equality = true, GreaterThan = true, Regex = true)]
+        [Basic]
         public string address 
         {
             get
@@ -41,6 +42,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsIPAddress(value, out this._address, false, true);
             }
         }
+
         [ReadOnlyAttribute]
         public string billing_class 
         {
@@ -53,8 +55,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._billing_class = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public BindingStateEnum binding_state { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
         public string client_hostname 
@@ -68,6 +72,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._client_hostname = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public long cltt 
         { 
@@ -80,9 +85,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._cltt = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(ContainsSearchable = true)]
         public discoverydata discovered_data { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public long ends 
         { 
@@ -95,9 +102,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._ends = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
         public string hardware { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
         public string ipv6_duid 
@@ -111,6 +120,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsIPv6DUID(value, out this._ipv6_duid, true, true);
             }
         }
+
         [ReadOnlyAttribute]
         public string ipv6_iaid 
         {
@@ -123,24 +133,34 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._ipv6_iaid = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public int ipv6_preferred_lifetime { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
         public uint ipv6_prefix_bits { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public bool is_invalid_mac { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string network { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string network_view { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public bool never_ends { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public bool never_starts { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public BindingStateEnum next_binding_state { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string on_commit 
         {
@@ -153,6 +173,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._on_commit = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public string on_expiry 
         {
@@ -165,6 +186,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._on_expiry = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public string on_release 
         {
@@ -177,6 +199,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._on_release = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public string option 
         { 
@@ -189,9 +212,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._option = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
         public IpProtocolEnum protocol { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string served_by 
         {
@@ -204,6 +229,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsIPAddress(value, out this._served_by, false, true);
             }
         }
+
         [ReadOnlyAttribute]
         public string server_host_name 
         { 
@@ -216,6 +242,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._server_host_name = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public long starts 
         {
@@ -228,6 +255,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._starts = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         public long tsfp 
         {
@@ -240,6 +268,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._tsfp = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         public long tstp 
         {
@@ -252,6 +281,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._tstp = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         public string uid 
         {
@@ -264,6 +294,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._uid = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
         public string username 
@@ -277,6 +308,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 this._username = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public string variable 
         {

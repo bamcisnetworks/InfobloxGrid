@@ -45,9 +45,13 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         public bool allow_telnet { get; set; }
+
         public clicredential[] cli_credentials { get; set; }
+
         public bool configure_for_dns { get; set; }
+
         [SearchableAttribute(Equality = true, CaseInsensitive = true, Regex = true)]
         public string device_description
         {
@@ -60,6 +64,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._device_description = value.TrimValue();
             }
         }
+
         [SearchableAttribute(Equality = true, CaseInsensitive = true, Regex = true)]
         public string device_location
         {
@@ -72,6 +77,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._device_location = value.TrimValue();
             }
         }
+
         [SearchableAttribute(Equality = true, CaseInsensitive = true, Regex = true)]
         public string device_type
         {
@@ -84,6 +90,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._device_type = value.TrimValue();
             }
         }
+
         [SearchableAttribute(Equality = true, CaseInsensitive = true, Regex = true)]
         public string device_vendor
         {
@@ -96,7 +103,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._device_vendor = value.TrimValue();
             }
         }
+
         public bool disable_discovery { get; set; }
+
         public string[] dns_aliases
         {
             get
@@ -113,8 +122,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [NotReadableAttribute]
         public bool enable_immediate_discovery { get; set; }
+
+        [Basic]
         public host_ipv4addr[] ipv4addrs
         {
             get
@@ -130,6 +142,8 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
+        [Basic]
         public host_ipv6addr[] ipv6addrs
         {
             get
@@ -146,8 +160,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [NotReadableAttribute]
         public bool restart_if_needed { get; set; }
+
         public string rrset_order
         {
             get
@@ -167,11 +183,17 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         public snmp3credential snmp3_credential { get; set; }
+
         public snmpcredential snmp_credential { get; set; }
+
         public bool use_cli_credentials { get; set; }
+
         public bool use_snmp3_credential { get; set; }
+
         public bool use_snmp_credential { get; set; }
+
 
         [JsonConstructor]
         private host(string name)

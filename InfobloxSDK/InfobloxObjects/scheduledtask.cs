@@ -20,7 +20,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
         private string _ticket_number;
 
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public ApprovalStatusEnum approval_status { get; set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string approver
@@ -34,6 +36,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._approver = value.TrimValue();
             }
         }
+
         public string approver_comment
         {
             get
@@ -45,14 +48,19 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._approver_comment = value.TrimValue();
             }
         }
+
         public bool automatic_restart { get; set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(ContainsSearchable = true)]
         public changedobject[] changed_objects { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public scheduledtask[] dependent_tasks { get; internal protected set; }
+
         [NotReadableAttribute]
         public bool execute_now { get; set; }
+
         [ReadOnlyAttribute]
         public string[] execution_details
         {
@@ -77,11 +85,15 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 }
             }
         }
+
         [ReadOnlyAttribute]
         public ExecutionDetailsTypeEnum execution_details_type { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public ExecutionStatusEnum execution_status { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, LessThan = true, GreaterThan = true)]
         public long execution_time
@@ -95,11 +107,15 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._execution_time = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         public bool is_network_insight_task { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string predecessor_task { get; internal protected set; }
+
         public bool re_execute_task { get; set; }
+
         [SearchableAttribute(Equality = true, LessThan = true, GreaterThan = true)]
         public long scheduled_time
         {
@@ -112,6 +128,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._scheduled_time = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, LessThan = true, GreaterThan = true)]
         public long submit_time
@@ -125,6 +142,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._submit_time = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         public string submitter
         {
@@ -137,6 +155,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._submitter = value.TrimValue();
             }
         }
+
         public string submitter_comment
         {
             get
@@ -148,11 +167,15 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._submitter_comment = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public uint task_id { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public TaskTypeEnum task_type { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string ticket_number
         {

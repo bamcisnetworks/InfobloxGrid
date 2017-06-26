@@ -8,8 +8,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
     public class zone_forward : BaseZone
     {
         [Required]
+        [Basic]
         public extserver[] forward_to { get; set; }
+
         public bool forwarders_only { get; set; }
+
         public forwardingmemberserver[] forwarding_servers { get; set; }
 
         public zone_forward(extserver[] forward_to, string fqdn) : base(fqdn)

@@ -18,6 +18,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
 
         [Required]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string[] admin_groups
         {
             get

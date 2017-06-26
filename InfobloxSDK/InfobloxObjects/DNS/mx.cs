@@ -23,8 +23,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsFqdn(value, "dns_mail_exchanger", out this._dns_mail_exchanger, false, true);
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string mail_exchanger
         {
             get
@@ -36,8 +38,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsFqdn(value, "mail_exchanger", out this._mail_exchanger, false, true);
             }
         }
+
         [Required]
         [SearchableAttribute(LessThan = true, Equality = true, GreaterThan = true)]
+        [Basic]
         public uint preference
         {
             get

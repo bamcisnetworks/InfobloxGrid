@@ -23,6 +23,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
         private string _username;
 
         [SearchableAttribute(Negative = true, LessThan = true, Equality = true, GreaterThan = true)]
+        [Basic]
         public long authentication_time 
         { 
             get
@@ -34,7 +35,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._authentication_time = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [SearchableAttribute(Negative = true, LessThan = true, Equality = true, GreaterThan = true)]
+        [Basic]
         public long expiration_time 
         { 
             get
@@ -46,13 +49,18 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._expiration_time = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string filter { get; set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string fingerprint { get; internal protected set; }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string guest_custom_field1 
         {
             get
@@ -65,6 +73,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
         }
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string guest_custom_field2
         {
             get
@@ -76,7 +85,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._guest_custom_field2 = value.TrimValue();
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string guest_custom_field3
         {
             get
@@ -88,7 +99,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._guest_custom_field3 = value.TrimValue();
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string guest_custom_field4
         {
             get
@@ -100,7 +113,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._guest_custom_field4 = value.TrimValue();
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string guest_email 
         {
             get
@@ -112,7 +127,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsValidEmail(value, out this._guest_email, true, true);
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string guest_first_name
         {
             get
@@ -124,7 +141,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._guest_first_name = value.TrimValue();
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string guest_last_name
         {
             get
@@ -136,7 +155,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._guest_last_name = value.TrimValue();
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string guest_middle_name
         {
             get
@@ -148,7 +169,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._guest_middle_name = value.TrimValue();
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string guest_phone
         {
             get
@@ -160,10 +183,14 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._guest_phone = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public bool is_registered_user { get; internal protected set; }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string mac 
         {
             get
@@ -175,9 +202,13 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsMAC(value, out this._mac, true, true);
             }
         }
+
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public bool never_expires { get; set; }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string reserved_for_infoblox
         {
             get
@@ -189,7 +220,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._reserved_for_infoblox = value.TrimValue();
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string username
         {
             get

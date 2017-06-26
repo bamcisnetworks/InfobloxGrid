@@ -20,6 +20,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
 
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string address 
         {
             get
@@ -31,6 +32,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
                 NetworkAddressTest.IsIPAddress(value, out this._address, false, true);
             }
         }
+
         public object[] associated_objects 
         {
             get
@@ -45,6 +47,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
                         typeof(lease), typeof(a), typeof(aaaa), typeof(host), typeof(host_ipv4addr), typeof(host_ipv6addr), typeof(ptr)  }, value, out this._associated_objects);
             }
         }
+
         [ReadOnlyAttribute]
         public string[] dns_names 
         {
@@ -63,7 +66,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
                 }
             }
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public bool is_ipv4 
         { 
             get
@@ -75,6 +80,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
                 this._is_ipv4 = value;
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
         public string mac_address 
@@ -88,6 +94,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
                 NetworkAddressTest.IsMAC(value, out this._mac_address, true, true);
             }
         }
+
         [ReadOnlyAttribute]
         public string network 
         { 
@@ -100,17 +107,25 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid.CloudApi
                 NetworkAddressTest.IsIPv4Cidr(value, out this._network, true, true);
             }
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public string network_view { get; internal protected set; }
+
         [ReadOnlyAttribute]
+        [Basic]
         public uint port_id { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string tenant { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
         public string vm_id { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string vm_name { get; internal protected set; }
     }
 }

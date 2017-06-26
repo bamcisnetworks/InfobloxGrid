@@ -20,6 +20,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
 
         [SearchableAttribute(Equality = true)]
         public IPv6AddressTypeEnum address_type { get; set; }
+
         public string domain_name
         {
             get
@@ -31,6 +32,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsFqdn(value, "domain_name", out this._domain_name, false, true);
             }
         }
+
         public string[] domain_name_servers
         {
             get
@@ -54,8 +56,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string duid
         {
             get
@@ -67,7 +71,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsIPv6DUID(value, out this._duid, false, true);
             }
         }
+
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string ipv6addr
         {
             get
@@ -87,6 +93,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [SearchableAttribute(Equality = true, Regex = true)]
         public string ipv6prefix
         {
@@ -106,8 +113,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [SearchableAttribute(Equality = true)]
         public uint ipv6prefix_bits { get; set; }
+
         [SearchableAttribute(Equality = true, Regex = true)]
         public string network
         {
@@ -127,6 +136,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public uint preferred_lifetime { get; set; }
         public string reserved_interface { get; set; }
         public bool use_domain_name { get; set; }

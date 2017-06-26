@@ -13,9 +13,12 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
 
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string dhcp_client_identifier { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, LessThan = true, GreaterThan = true)]
+        [Basic]
         public string ip_address 
         {
             get
@@ -31,10 +34,13 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
                 }
             }
         }
+
         [ReadOnlyAttribute]
         public bool is_invalid_mac { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string mac_address 
         {
             get
@@ -46,8 +52,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
                 NetworkAddressTest.IsMAC(value, out this._mac_address, true, true);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string network 
         { 
             get
@@ -59,11 +67,15 @@ namespace BAMCIS.Infoblox.InfobloxObjects.IPAM
                 NetworkAddressTest.IsIPv4Cidr(value, out this._network, true, true);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string status { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string username { get; internal protected set; }
     }
 }

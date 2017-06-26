@@ -10,11 +10,16 @@ namespace BAMCIS.Infoblox.InfobloxObjects
         private DateTime _timestamp;
 
         [ReadOnlyAttribute]
+        [Basic]
         public string description { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public ZoneDiscrepancySeverityEnum severity { get; internal protected set; }
+
         [ReadOnlyAttribute]
+        [Basic]
         public long timestamp
         {
             get
@@ -26,8 +31,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._timestamp = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string zone { get; internal protected set; }
     }
 }

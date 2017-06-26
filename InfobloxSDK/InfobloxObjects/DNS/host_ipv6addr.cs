@@ -18,6 +18,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
         private string _ipv6prefix;
 
         public IPv6AddressTypeEnum address_type { get; set; }
+
         public string domain_name
         {
             get
@@ -29,6 +30,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsFqdn(value, "domain_name", out this._domain_name, true, true);
             }
         }
+
         public string[] domain_name_servers
         {
             get
@@ -49,7 +51,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string duid
         {
             get
@@ -61,7 +65,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 NetworkAddressTest.IsIPv6DUID(value, out this._duid, true, true);
             }
         }
+
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string ipv6addr
         {
             get
@@ -77,6 +83,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [SearchableAttribute(Equality = true, Regex = true)]
         public string ipv6prefix
         {
@@ -94,14 +101,22 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [SearchableAttribute(Equality = true, LessThan = true, GreaterThan = true)]
         public uint ipv6prefix_bits { get; set; }
+
         public IPv6MatchClientEnum match_client { get; set; }
+
         public uint preferred_lifetime { get; set; }
+
         public bool use_domain_name { get; set; }
+
         public bool use_domain_servers { get; set; }
+
         public bool use_preferred_lifetime { get; set; }
+
         public bool use_valid_lifetime { get; set; }
+
         public uint valid_lifetime { get; set; }
 
         public host_ipv6addr()

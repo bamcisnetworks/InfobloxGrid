@@ -110,6 +110,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
         public bool ignore_dhcp_option_list_request { get; set; }
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string ipv4addr 
         {
             get

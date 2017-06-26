@@ -11,8 +11,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid
     {
         private List<string> _ignore_mac_addresses;
 
+        [Basic]
         public bool disable_all_nac_filters { get; set; }
+
         public IgnoreIdEnum ignore_id { get; set; }
+
         public string[] ignore_mac_addresses
         {
             get
@@ -30,6 +33,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.Grid
                 }
             }
         }
+
         public dhcpoption[] options { get; set; }
 
         public dhcpproperties()

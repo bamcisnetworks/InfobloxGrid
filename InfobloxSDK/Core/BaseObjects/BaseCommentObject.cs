@@ -4,11 +4,11 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
 {
     public abstract class BaseCommentObject : RefObject
     {
-        private string _comment;
+        protected string _comment;
 
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         [Basic]
-        public string comment
+        public virtual string comment
         {
             get
             {

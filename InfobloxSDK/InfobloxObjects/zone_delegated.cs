@@ -8,8 +8,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
     public class zone_delegated : BaseZone
     {
         [Required]
+        [Basic]
         public extserver[] delegate_to { get; set; }
+
         public uint delegated_ttl { get; set; }
+
         public bool enable_rfc2317_exception { get; set; }
         
         public zone_delegated(extserver[] delegate_to, string fqdn) : base(fqdn)

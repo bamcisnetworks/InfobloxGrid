@@ -32,7 +32,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
         private string _unknown_clients;
 
         public bool always_update_dns { get; set; }
+
         public string bootfile { get; set; }
+
         public string bootserver
         {
             get
@@ -64,7 +66,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public info cloud_info { get; set; }
+
         public string ddns_domainname
         {
             get
@@ -76,15 +80,24 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 NetworkAddressTest.IsFqdn(value, "ddns_domainname", out this._ddns_domainname, true, true);
             }
         }
+
         public bool ddns_generate_hostname { get; set; }
+
         public bool deny_all_clients { get; set; }
+
         public bool deny_bootp { get; set; }
+
         public bool disable { get; set; }
+
         [ReadOnlyAttribute]
         public DiscoverNowStatusEnum discover_now_status { get; internal protected set; }
+
         public basicpollsettings discovery_basic_poll_settings { get; set; }
+
         public blackoutsetting discovery_blackout_setting { get; set; }
+
         public string discovery_member { get; set; }
+
         public string[] email_list
         {
             get
@@ -104,16 +117,25 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public bool enable_ddns { get; set; }
+
         public bool enable_dhcp_thresholds { get; set; }
+
         public bool enable_discovery { get; set; }
+
         public bool enable_email_warnings { get; set; }
+
         public bool enable_ifmap_publishing { get; set; }
+
         [NotReadableAttribute]
         public bool enable_immediate_discovery { get; set; }
+
         public bool enable_snmp_warnings { get; set; }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string end_addr
         {
             get
@@ -133,10 +155,14 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public exclusionrange[] exclude { get; set; }
+
         [SearchableAttribute(Equality = true)]
         public string failover_association { get; set; }
+
         public filterrule[] fingerprint_filter_rules { get; set; }
+
         public uint high_water_mark
         {
             get
@@ -155,6 +181,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public uint high_water_mark_reset
         {
             get
@@ -180,8 +207,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public bool ignore_dhcp_option_list_request { get; set; }
+
         public IgnoreIdEnum ignore_id { get; set; }
+
         public string[] ignore_mac_addresses
         {
             get
@@ -200,8 +230,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [ReadOnlyAttribute]
         public bool is_split_scope { get; internal protected set; }
+
         public string known_clients
         {
             get
@@ -220,6 +252,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public int lease_scavenge_time
         {
             get
@@ -238,7 +271,9 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public logicfilterrule[] logic_filter_rules { get; set; }
+
         public uint low_water_mark
         {
             get
@@ -257,6 +292,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public uint low_water_mark_reset
         {
             get
@@ -282,14 +318,20 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public filterrule[] mac_filter_rules { get; set; }
+
         [SearchableAttribute(Equality = true)]
         public dhcpmember member { get; set; }
+
         public msdhcpoption[] ms_options { get; set; }
+
         [SearchableAttribute(Equality = true)]
         public msdhcpserver ms_server { get; set; }
         public filterrule[] nac_filter_rules { get; set; }
+
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string network
         {
             get
@@ -308,8 +350,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string network_view { get; set; }
+
         public string nextserver
         {
             get
@@ -340,17 +385,27 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public filterrule[] option_filter_rules { get; set; }
+
         public dhcpoption[] options { get; set; }
+
         public blackoutsetting port_control_blackout_setting { get; set; }
+
         public uint pxe_lease_time { get; set; }
+
         public bool recycle_leases { get; set; }
+
         public filterrule[] relay_agent_filter_rules { get; set; }
+
         [NotReadableAttribute]
         public bool restart_if_needed { get; set; }
+
         public bool same_port_control_discovery_blackout { get; set; }
+
         [SearchableAttribute(Equality = true)]
         public ServerAssociationTypeExpandedEnum server_association_type { get; set; }
+
         [NotReadableAttribute]
         public uint split_scope_exclusion_percent
         {
@@ -370,8 +425,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
+        [Basic]
         public string start_addr
         {
             get
@@ -391,8 +448,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         [NotReadableAttribute]
         public string template { get; set; }
+
         public string unknown_clients
         {
             get
@@ -411,27 +470,49 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DHCP
                 }
             }
         }
+
         public bool update_dns_on_lease_renewal { get; set; }
+
         public bool use_blackout_setting { get; set; }
+
         public bool use_bootfile { get; set; }
+
         public bool use_bootserver { get; set; }
+
         public bool use_ddns_domainname { get; set; }
+
         public bool use_ddns_generate_hostname { get; set; }
+
         public bool use_deny_bootp { get; set; }
+
         public bool use_discovery_basic_poll_settings { get; set; }
+
         public bool use_email_list { get; set; }
+
         public bool use_enable_ddns { get; set; }
+
         public bool use_enable_dhcp_thresholds { get; set; }
+
         public bool use_enable_discovery { get; set; }
+
         public bool use_enable_ifmap_publishing { get; set; }
+
         public bool use_ignore_dhcp_option_list_request { get; set; }
+
         public bool use_ignore_id { get; set; }
+
         public bool use_known_clients { get; set; }
+
         public bool use_lease_scavenge_time { get; set; }
+
         public bool use_nextserver { get; set; }
+
         public bool use_options { get; set; }
+
         public bool use_recycle_leases { get; set; }
+
         public bool use_unknown_clients { get; set; }
+
         public bool use_update_dns_on_lease_renewal { get; set; }
 
         public ipv4range(string end_addr, string start_addr)

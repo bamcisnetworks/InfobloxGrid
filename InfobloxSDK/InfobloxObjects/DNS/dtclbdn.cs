@@ -13,6 +13,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
 
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string comment
         {
             get
@@ -31,13 +32,17 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 }
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
         public bool disable { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string lbdn { get; internal protected set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
+        [Basic]
         public string name
         {
             get
@@ -49,6 +54,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._name = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(CaseInsensitive = true, Equality = true, Regex = true)]
         public string pattern
@@ -62,8 +68,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._pattern = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string view
         {
             get
@@ -75,8 +83,10 @@ namespace BAMCIS.Infoblox.InfobloxObjects.DNS
                 this._view = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string zone { get; internal protected set; }
     }
 }

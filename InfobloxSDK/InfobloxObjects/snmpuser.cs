@@ -11,6 +11,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
 
         [ReadOnlyAttribute]
         public AuthenticationProtocolEnum authentication_protocol { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string comment
         {
@@ -23,9 +24,13 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._comment = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public bool disbale { get; internal protected set; }
+
         [ReadOnlyAttribute]
+        [Basic]
         public string name
         {
             get
@@ -37,6 +42,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._name = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public PrivacyProtocolEnum privacy_protocol { get; internal protected set; }
     }

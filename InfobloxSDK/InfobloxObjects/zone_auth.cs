@@ -32,8 +32,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
         private DateTime _zone_not_queried_enabled_time;
 
         public addressac[] allow_active_dir { get; set; }
+
         public bool allow_gss_tsig_for_underscore_zone { get; set; }
+
         public bool allow_gss_tsig_zone_updates { get; set; }
+
         public object[] allow_query
         {
             get
@@ -46,6 +49,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 ValidateUnknownArray.ValidateHomogenousArray(new List<Type>() { typeof(addressac), typeof(tsigac) }, value, out this._allow_query);
             }
         }
+
         public object[] allow_transfer
         {
             get
@@ -58,6 +62,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 ValidateUnknownArray.ValidateHomogenousArray(new List<Type>() { typeof(addressac), typeof(tsigac) }, value, out this._allow_transfer);
             }
         }
+
         public object[] allow_update
         {
             get
@@ -70,20 +75,32 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 ValidateUnknownArray.ValidateHomogenousArray(new List<Type>() { typeof(addressac), typeof(tsigac) }, value, out this._allow_update);
             }
         }
+
         public bool allow_update_forwarding { get; set; }
+
         [ReadOnlyAttribute]
         public info cloud_info { get; internal protected set; }
+
         public bool copy_xfer_to_notify { get; set; }
+
         [NotReadableAttribute]
         public bool create_ptr_for_bulk_hosts { get; set; }
+
         [NotReadableAttribute]
         public bool create_ptr_for_hosts { get; set; }
+
         public bool create_underscore_zones { get; set; }
+
         public bool disable_forwarding { get; set; }
+
         public bool dns_integrity_enable { get; set; }
+
         public uint dns_integrity_frequency { get; set; }
+
         public string dns_integrity_member { get; set; }
+
         public bool dns_integrity_verbose_logging { get; set; }
+
         [ReadOnlyAttribute]
         public string dns_soa_email
         {
@@ -96,8 +113,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsValidEmail(value, out this._dns_soa_email, false, true);
             }
         }
+
         public dnsseckeyparams dnssec_key_params { get; set; }
+
         public dnsseckey[] dnssec_keys { get; set; }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, LessThan = true, GreaterThan = true)]
         public long dnssec_ksk_rollover_date
@@ -111,6 +131,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._dnssec_ksk_rollover_date = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true, LessThan = true, GreaterThan = true)]
         public long dnssec_zsk_rollover_date
@@ -124,9 +145,12 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._dnssec_zsk_rollover_date = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [NotReadableAttribute]
         public bool do_host_abstraction { get; set; }
+
         public FailWarnEnum effective_check_names_policy { get; set; }
+
         [ReadOnlyAttribute]
         public string effective_record_name_policy
         {
@@ -139,13 +163,19 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._effective_record_name_policy = value.TrimValueWithException("effective_record_name_policy");
             }
         }
+
         public extserver[] external_primaries { get; set; }
+
         public extserver[] external_secondaries { get; set; }
+
         [SearchableAttribute(Equality = true, Regex = true)]
         public memberserver[] grid_primary { get; set; }
+
         [ReadOnlyAttribute]
         public bool grid_primary_shared_with_ms_parent_delegation { get; internal protected set; }
+
         public memberserver[] grid_secondaries { get; set; }
+
         [NotReadableAttribute]
         public string import_from
         {
@@ -158,12 +188,16 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsIPAddress(value, out this._import_from, false, true);
             }
         }
+
         [ReadOnlyAttribute]
         public bool is_dnssec_enabled { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public bool is_dnssec_signed { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public bool is_multimaster { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public long last_queried
         {
@@ -177,13 +211,20 @@ namespace BAMCIS.Infoblox.InfobloxObjects
             }
         }
         public gridmember_soamname[] member_soa_mnames { get; set; }
+
         [ReadOnlyAttribute]
         public gridmember_soaserial[] member_soa_serials { get; internal protected set; }
+
         public addressac[] ms_allow_transfer { get; set; }
+
         public MsAllowTransferModeEnum ms_allow_transfer_mode { get; set; }
+
         public msdnsserver[] ms_primaries { get; set; }
+
         public msdnsserver[] ms_secondaries { get; set; }
+
         public bool ms_sync_disabled { get; set; }
+
         [ReadOnlyAttribute]
         public object[] network_associations
         {
@@ -197,6 +238,7 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 ValidateUnknownArray.ValidateHetergenousArray(new List<Type>() { typeof(network), typeof(networkcontainer), typeof(ipv6network), typeof(ipv6networkcontainer) }, value, out this._network_associations);
             }
         }
+
         [ReadOnlyAttribute]
         public string network_view
         {
@@ -209,8 +251,11 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._network_view = value.TrimValueWithException("network_view");
             }
         }
+
         public uint notify_delay { get; set; }
+
         public string ns_group { get; set; }
+
         [ReadOnlyAttribute]
         public string primary_type
         {
@@ -238,11 +283,15 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 }
             }
         }
+
         public string record_name_policy { get; set; }
+
         [ReadOnlyAttribute]
         public bool records_monitored { get; internal protected set; }
+
         [NotReadableAttribute]
         public bool restart_if_needed { get; set; }
+
         [ReadOnlyAttribute]
         public long rr_not_queried_enabled_time
         {
@@ -255,9 +304,12 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 this._rr_not_queried_enabled_time = UnixTimeHelper.FromUnixTime(value);
             }
         }
+
         [NotReadableAttribute]
         public bool set_soa_serial_numbe { get; set; }
+
         public uint soa_default_ttl { get; set; }
+
         public string soa_email
         {
             get
@@ -269,12 +321,19 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 NetworkAddressTest.IsValidEmail(value, out this._soa_email, true, true);
             }
         }
+
         public uint soa_expire { get; set; }
+
         public uint soa_negative_ttl { get; set; }
+
         public uint soa_refresh { get; set; }
+
         public uint soa_retry { get; set; }
+
         public uint soa_serial_number { get; set; }
+
         public string[] srgs { get; set; }
+
         public object[] update_forwarding
         {
             get
@@ -287,20 +346,35 @@ namespace BAMCIS.Infoblox.InfobloxObjects
                 ValidateUnknownArray.ValidateHomogenousArray(new List<Type>() { typeof(addressac), typeof(tsigac) }, value, out this._update_forwarding);
             }
         }
+
         public bool use_allow_active_dir { get; set; }
+
         public bool use_allow_query { get; set; }
+
         public bool use_allow_transfer { get; set; }
+
         public bool use_allow_update { get; set; }
+
         public bool use_allow_update_forwarding { get; set; }
+
         public bool use_check_names_policy { get; set; }
+
         public bool use_copy_xfer_to_notify { get; set; }
+
         public bool use_dnssec_key_params { get; set; }
+
         public bool use_external_primary { get; set; }
+
         public bool use_grid_zone_timer { get; set; }
+
         public bool use_import_from { get; set; }
+
         public bool use_notify_delay { get; set; }
+
         public bool use_record_name_policy { get; set; }
+
         public bool use_soa_email { get; set; }
+
         [ReadOnlyAttribute]
         public long zone_not_queried_enabled_time
         {

@@ -30,7 +30,9 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 NetworkAddressTest.IsIPAddress(value, out this._address, false, true);
             }
         }
+
         public bool disable { get; set; }
+
         [ReadOnlyAttribute]
         public string display_domain
         {
@@ -43,7 +45,9 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 NetworkAddressTest.IsFqdn(value, "display_domain", out this._display_domain, false, true);
             }
         }
+
         [ReadOnlyAttribute]
+        [Basic]
         public string dns_fqdn
         {
             get
@@ -55,6 +59,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 NetworkAddressTest.IsFqdn(value, "dns_fqdn", out this._dns_fqdn, false, true);
             }
         }
+
         [Required]
         [SearchableAttribute(Equality = true, Regex = true)]
         public string fqdn
@@ -68,7 +73,9 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 NetworkAddressTest.IsFqdn(value, "fqdn", out this._fqdn, false, true);
             }
         }
+
         public bool locked { get; set; }
+
         [ReadOnlyAttribute]
         public string locked_by
         {
@@ -81,6 +88,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._locked_by = value.TrimValueWithException("locked_by");
             }
         }
+
         [ReadOnlyAttribute]
         public string mask_prefix
         {
@@ -101,6 +109,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 }
             }
         }
+
         public bool ms_ad_integrated
         {
             get
@@ -119,11 +128,15 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._ms_ad_integrated = value;
             }
         }
+
         public MsDdnsModeEnum ms_ddns_mode { get; set; }
+
         [ReadOnlyAttribute]
         public MsManagedEnum ms_managed { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public bool ms_read_only { get; internal protected set; }
+
         [ReadOnlyAttribute]
         public string ms_sync_master_name
         {
@@ -136,6 +149,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._ms_sync_master_name = value.TrimValueWithException("ms_sync_master_name");
             }
         }
+
         [ReadOnlyAttribute]
         [SearchableAttribute(Equality = true)]
         public string parent
@@ -149,6 +163,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 NetworkAddressTest.IsFqdn(value, "parent", out this._parent, true, true);
             }
         }
+
         public string prefix
         {
             get
@@ -160,9 +175,12 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._prefix = value.TrimValue();
             }
         }
+
         [ReadOnlyAttribute]
         public bool using_srg_associations { get; internal protected set; }
+
         [SearchableAttribute(Equality = true)]
+        [Basic]
         public string view
         {
             get
@@ -174,6 +192,7 @@ namespace BAMCIS.Infoblox.Core.BaseObjects
                 this._view = value.TrimValueWithException("view");
             }
         }
+
         [SearchableAttribute(Equality = true)]
         public ZoneFormatEnum zone_format { get; set; }
 
