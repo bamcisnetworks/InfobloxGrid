@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 
@@ -100,6 +102,38 @@ namespace BAMCIS.Infoblox.Errors
                 this.HttpErrorReason = e.Message;
                 this.HttpResponseCode = 0;
                 this.HttpStatus = e.GetType().FullName;
+            }
+            else
+            {
+                throw new ArgumentNullException("e", "The Exception used to create a CustomInfobloxException cannot be null.");
+            }
+        }
+
+        public InfobloxCustomException(AggregateException e)
+        {
+            if (e != null)
+            {
+                this._message = e.InnerException.Message;
+
+                string Text = String.Empty;
+
+                Stack<Exception> Exceptions = new Stack<Exception>(e.InnerExceptions);
+
+                while (Exceptions.Count > 0)
+                {
+                    Exception Temp = Exceptions.Pop();
+                    Text += $"{Temp.Message}\r\n\r\n";
+
+                    if (Temp.InnerException != null)
+                    {
+                        Exceptions.Push(Temp.InnerException);
+                    }
+                }
+
+                this.Error = e.InnerException.HResult.ToString();
+                this.HttpErrorReason = e.InnerException.Message;
+                this.HttpResponseCode = 0;
+                this.HttpStatus = e.InnerException.GetType().FullName;
             }
             else
             {

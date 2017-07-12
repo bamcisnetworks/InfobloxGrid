@@ -1,6 +1,7 @@
 ﻿using BAMCIS.Infoblox.Core;
 using BAMCIS.Infoblox.Errors;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,7 +86,9 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                             WriteVerbose($"Response {Content}");
 
                             dynamic Obj = JsonConvert.DeserializeObject(Content);
-                            IEnumerable<string> Versions = Obj.supported_versions;
+                            JArray JVersions = Obj.supported_versions;
+
+                            IEnumerable<string> Versions = JVersions.ToObject<string[]>();
 
                             WriteVerbose("Got versions");
 
@@ -105,6 +108,7 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                     {
                         InfobloxCustomException Ex = new InfobloxCustomException(e);
                         PSCommon.WriteExceptions(Ex, this.Host);
+                        this.ThrowTerminatingError(new ErrorRecord(Ex, Ex.HttpStatus, ErrorCategory.NotSpecified, this));
                     }
                     catch (HttpRequestException e)
                     {
@@ -120,11 +124,19 @@ namespace BAMCIS.Infoblox.PowerShell.Generic
                         }
 
                         PSCommon.WriteExceptions(Ex, this.Host);
+                        this.ThrowTerminatingError(new ErrorRecord(Ex, Ex.HttpStatus, ErrorCategory.NotSpecified, this));
+                    }
+                    catch (AggregateException e)
+                    {
+                        InfobloxCustomException Ex = new InfobloxCustomException(e.InnerException.Message);
+                        PSCommon.WriteExceptions(Ex, this.Host);
+                        this.ThrowTerminatingError(new ErrorRecord(Ex, Ex.HttpStatus, ErrorCategory.NotSpecified, this));
                     }
                     catch (Exception e)
                     {
                         InfobloxCustomException Ex = new InfobloxCustomException(e);
                         PSCommon.WriteExceptions(Ex, this.Host);
+                        this.ThrowTerminatingError(new ErrorRecord(Ex, Ex.HttpStatus, ErrorCategory.NotSpecified, this));
                     }
                 }
             }
