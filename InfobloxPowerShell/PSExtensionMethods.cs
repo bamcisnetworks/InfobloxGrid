@@ -41,108 +41,116 @@ namespace BAMCIS.Infoblox.PowerShell
 
         internal static T GetUnboundValue<T>(this PSCmdlet cmdlet, string paramName)
         {
+            if (!String.IsNullOrEmpty(paramName))
+            {
                 return cmdlet.GetUnboundValue<T>(paramName, -1);
+            }
+            else
+            {
+                throw new ArgumentNullException("paramName", "The paramName cannot be null or empty.");
+            }
         }
 
         internal static T GetUnboundValue<T>(this PSCmdlet cmdlet, int unnamedPosition)
         {
-            return cmdlet.GetUnboundValue<T>(String.Empty, unnamedPosition);
+            if (unnamedPosition >= 0)
+            {
+                return cmdlet.GetUnboundValue<T>(String.Empty, unnamedPosition);
+            }
+            else
+            {
+                throw new ArgumentException("unnamedPosition", "The position must be greater than or equal to 0.");
+            }
         }
 
         private static T GetUnboundValue<T>(this PSCmdlet cmdlet, string paramName, int unnamedPosition)
         {
             if (cmdlet != null)
             {
-                if (!String.IsNullOrEmpty(paramName))
+                // If paramName isn't found, value at unnamedPosition will be returned instead
+                object Context = TryGetProperty(cmdlet, "Context");
+                object Processor = TryGetProperty(Context, "CurrentCommandProcessor");
+                object ParameterBinder = TryGetProperty(Processor, "CmdletParameterBinderController");
+                IEnumerable Args = TryGetProperty(ParameterBinder, "UnboundArguments") as System.Collections.IEnumerable;
+
+                if (Args != null)
                 {
-                    // If paramName isn't found, value at unnamedPosition will be returned instead
-                    object Context = TryGetProperty(cmdlet, "Context");
-                    object Processor = TryGetProperty(Context, "CurrentCommandProcessor");
-                    object ParameterBinder = TryGetProperty(Processor, "CmdletParameterBinderController");
-                    IEnumerable Args = TryGetProperty(ParameterBinder, "UnboundArguments") as System.Collections.IEnumerable;
+                    bool IsSwitch = typeof(SwitchParameter) == typeof(T);
 
-                    if (Args != null)
+                    string CurrentParameterName = String.Empty;
+                    //object UnnamedValue = null;
+                    int i = 0;
+
+                    foreach (object Arg in Args)
                     {
-                        bool IsSwitch = typeof(SwitchParameter) == typeof(T);
+                        //Is the unbound argument associated with a parameter name
+                        object IsParameterName = TryGetProperty(Arg, "ParameterNameSpecified");
 
-                        string CurrentParameterName = String.Empty;
-                        //object UnnamedValue = null;
-                        int i = 0;
-
-                        foreach (object Arg in Args)
+                        //The parameter name for the argument was specified
+                        if (IsParameterName != null && true.Equals(IsParameterName))
                         {
-                            //Is the unbound argument associated with a parameter name
-                            object IsParameterName = TryGetProperty(Arg, "ParameterNameSpecified");
+                            string ParameterName = TryGetProperty(Arg, "ParameterName") as string;
+                            CurrentParameterName = ParameterName;
 
-                            //The parameter name for the argument was specified
-                            if (IsParameterName != null && true.Equals(IsParameterName))
+                            //If it's a switch parameter, there won't be a value following it, so just return a present switch
+                            if (IsSwitch && String.Equals(CurrentParameterName, paramName, StringComparison.OrdinalIgnoreCase))
                             {
-                                string ParameterName = TryGetProperty(Arg, "ParameterName") as string;
-                                CurrentParameterName = ParameterName;
-
-                                //If it's a switch parameter, there won't be a value following it, so just return a present switch
-                                if (IsSwitch && String.Equals(CurrentParameterName, paramName, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    return (T)(object)new SwitchParameter(true);
-                                }
-
-                                //Since we have a current parameter name, the next value in Args should be the value supplied
-                                //to the argument, so we can head on to the next iteration
-                                continue;
+                                return (T)(object)new SwitchParameter(true);
                             }
 
-                            //We assume the previous iteration identified a parameter name, so this must be its
-                            //value
-                            object ParameterValue = TryGetProperty(Arg, "ArgumentValue");
+                            //Since we have a current parameter name, the next value in Args should be the value supplied
+                            //to the argument, so we can head on to the next iteration, this skips the remaining code below
+                            //and starts the next item in the foreach loop
+                            continue;
+                        }
 
-                            //If the value we have grabbed had a parameter name specified,
-                            //let's check to see if it's the desired parameter
-                            if (CurrentParameterName != String.Empty)
-                            {
-                                //If the parameter name currently being assessed is equal to the provided param
-                                //name, then return the value of the param
-                                if (CurrentParameterName.Equals(paramName, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    return ConvertParameter<T>(ParameterValue);
-                                }
-                                else
-                                {
-                                    //Since this wasn't the parameter name we were looking for, clear it out
-                                    CurrentParameterName = String.Empty;
-                                }
-                            }
-                            //Otherwise there wasn't a parameter name, so the argument must have been supplied positionally,
-                            //check if the current index is the position whose value we want
-                            //Since positional parameters have to be specified first, this will be evaluated and increment until
-                            //we run out of parameters or find a parameter with a name/value
-                            else if (i++ == unnamedPosition)
-                            {
-                                //UnnamedValue = ParameterValue;  // Save this for later in case paramName isn't found
+                        //We assume the previous iteration identified a parameter name, so this must be its
+                        //value
+                        object ParameterValue = TryGetProperty(Arg, "ArgumentValue");
 
-                                //Just return the parameter value if the position matches what was specified
+                        //If the value we have grabbed had a parameter name specified,
+                        //let's check to see if it's the desired parameter
+                        if (CurrentParameterName != String.Empty)
+                        {
+                            //If the parameter name currently being assessed is equal to the provided param
+                            //name, then return the value of the param
+                            if (CurrentParameterName.Equals(paramName, StringComparison.OrdinalIgnoreCase))
+                            {
                                 return ConvertParameter<T>(ParameterValue);
                             }
-
-                            /* Trying to move this, it should only need to be cleared if it wasn't emptyu
-                            // Found a value, so currentParameterName needs to be cleared for the check above
-                            CurrentParameterName = String.Empty;
-                            */
+                            else
+                            {
+                                //Since this wasn't the parameter name we were looking for, clear it out
+                                CurrentParameterName = String.Empty;
+                            }
                         }
-
-                        /* This shouldn't be needed, if the position was specified
-                        if (UnnamedValue != null)
+                        //Otherwise there wasn't a parameter name, so the argument must have been supplied positionally,
+                        //check if the current index is the position whose value we want
+                        //Since positional parameters have to be specified first, this will be evaluated and increment until
+                        //we run out of parameters or find a parameter with a name/value
+                        else if (i++ == unnamedPosition)
                         {
-                            return ConvertParameter<T>(UnnamedValue);
+                            //UnnamedValue = ParameterValue;  // Save this for later in case paramName isn't found
+
+                            //Just return the parameter value if the position matches what was specified
+                            return ConvertParameter<T>(ParameterValue);
                         }
+
+                        /* Trying to move this, it should only need to be cleared if it wasn't emptyu
+                        // Found a value, so currentParameterName needs to be cleared for the check above
+                        CurrentParameterName = String.Empty;
                         */
                     }
 
-                    return default(T);
+                    /* This shouldn't be needed, if the position was specified
+                    if (UnnamedValue != null)
+                    {
+                        return ConvertParameter<T>(UnnamedValue);
+                    }
+                    */
                 }
-                else
-                {
-                    throw new ArgumentNullException("paramName", "The unbound value parameter name cannot be null or empty.");
-                }
+
+                return default(T);
             }
             else
             {
@@ -166,6 +174,11 @@ namespace BAMCIS.Infoblox.PowerShell
 
             if (value is T)
             {
+                if (typeof(T) == typeof(string))
+                {
+                    //Remove quotes from string values taken from the command line
+                    value = value.ToString().Trim('"').Trim('\'');
+                }
                 return (T)value;
             }
 
@@ -206,7 +219,7 @@ namespace BAMCIS.Infoblox.PowerShell
                     {
                         return PropInfo.GetValue(instance, null);
                     }
-                    catch { }
+                    catch (Exception) { }
                 }
 
                 // maybe it's a field

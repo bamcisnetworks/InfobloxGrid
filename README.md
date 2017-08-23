@@ -89,6 +89,9 @@ Error - The error message returned from Infoblox as part of the response body, o
 
 ## Revision History
 
+### 2.0.0.3
+Updated the unbound parameter methods to handle unbound parameters surrounded in quotes.
+
 ### 2.0.0.2
 Fixed the handling of getting the latest version where the JArray of supported_versions could not be cast to an IEnumerable<string>. Added functionality to catch and unroll aggregate exceptions.
 
